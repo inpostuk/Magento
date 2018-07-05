@@ -1,0 +1,679 @@
+/**
+ * (c) InPost UK Ltd <support@inpost.co.uk>
+ * This source file is subject to the license that is bundled
+ * with this source code in the file LICENSE.
+ * 
+ * Built by NMedia Systems Ltd, <info@nmediasystems.com>
+ */
+
+html, body {
+    overflow: auto;
+}
+
+.left {
+    float: left;
+    box-sizing: border-box;
+}
+
+.right{
+    float: right;
+    box-sizing: border-box;
+}
+
+.middle {
+    margin: 0 auto;
+    width: auto;
+}
+
+.page {
+    position: relative;
+}
+
+.lockers {
+    position: fixed;
+    top: 0;
+    /* overflow: hidden; */
+    width: 100%;
+    height: 100vh;
+    font-family: 'Open Sans', sans-serif;
+    z-index: 3;
+    box-sizing: border-box;
+}
+
+.lockers-overlay {
+    position: fixed;
+    height: 100vh;
+    width: 100%;
+    background: black;
+    opacity: 0.4;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.lockers .lockers-content {
+    height: 96%;
+    max-width: 80%;
+    max-height: 100%;
+    margin: 1% 0 3% 10%;
+    background-color: white;
+    padding-bottom: 20px;
+    position: relative;
+}
+
+.lockers .lockers-content #map {
+    height: 100%;
+}
+
+.lockers .lockers-content .left, .lockers .lockers-content .right {
+    height: 100%;
+}
+
+.lockers .lockers-content .left {
+    width: 30%;
+    padding-left: 30px;
+    position: relative;
+}
+
+.lockers .lockers-content .left .container{
+    height: calc(100% - 40px);
+}
+
+.lockers .lockers-content .left .container .left-container {
+    height: 100%;
+    text-align: left;
+}
+
+.show-more.select {
+    height:40px;
+}
+
+.lockers .lockers-content .right {
+    width: 70%;
+    padding-right: 30px;
+}
+
+.lockers .lockers-content .top {
+    height: 12%;
+    max-height: 87px;
+}
+
+.lockers .lockers-content .middle {
+    height:100%;
+    float: right;
+    width: 70%;
+    padding-right: 30px;
+}
+
+.lockers .lockers-content .top input {
+    width: 100%;
+    max-width: 80%;
+    border: 1px solid;
+    height: 100%;
+    font-family: 'Open Sans', sans-serif;
+    box-sizing: border-box;
+}
+
+.lockers .lockers-content .top button {
+    height: 100%;
+    background: #FFCB04;
+    color: #404041;
+    font-weight: 700;
+    border: 1px solid black;
+    padding: 0 10px;
+    font-family: 'Open Sans', sans-serif;
+    width: 100%;
+    max-width: 20%;
+}
+
+.points {
+    padding-right: 15px;
+    overflow: scroll;
+    height: calc(100% - 31px);
+    overflow-x: visible;
+}
+
+.point-content {
+    border: 1px solid #adadad;
+}
+
+.point {
+    padding-bottom: 20px;
+    text-align: left;
+}
+
+.point-content .title {
+    font-size: 13px;
+    overflow: hidden;
+    display: table;
+    width: 100%;
+}
+
+.point-content .title span.distance {
+    font-size: 12px;
+}
+
+.point-content .title .left {
+    padding-left: 5px;
+    display: table-column;
+    width: auto;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.point-content .title .right, .lockers .lockers-content .title .right {
+    display: table-column;
+    width: auto;
+    padding-right: 5px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.point-content .address {
+    padding: 15px 5px;
+    font-size: 13px;
+    line-height: 15px;
+}
+
+button.select {
+    height: 40px;
+    width: 100%;
+    background: #ffffff;
+    font-size: 14px;
+    border-top: none;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.point.active button.select {
+    background: #FFCB04;
+}
+
+button.select:hover {
+    background: #FFCB04;
+}
+
+.opening-hours + .hours {
+    display: none;
+}
+
+.opening-hours.active + .hours {
+    display: block;
+}
+
+.opening-hours {
+    padding: 0px 0 5px 5px;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.opening-hours:after {
+    content: "";
+    display: block;
+    float: right;
+    width: 16px;
+    height: 18px;
+    background-image: url(../../images/inpost/info.png);
+    overflow: visible;
+    color: black;
+    margin:1px 10px 0 0;
+    background-size: cover;
+}
+
+.op-hours {
+    width: 80%;
+    margin: 20px 20%;
+}
+
+.hours > div {
+    padding: 10px 5px;
+}
+
+button.show-more {
+    border: 1px solid rgb(216, 216, 216);
+    background: #FFCB04;
+    color: #404041;
+}
+
+.info-window-name {
+    padding: 0;
+    display: table-column;
+    width: auto;
+    float:left;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding-right: 20px;
+}
+
+.info-window {
+    max-width: 300px;
+    text-align: left;
+}
+
+.info-window-name + .right {
+    width: auto;
+    padding-right: 0;
+    padding-top: 1px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+}
+
+.lockers h2, .lockers table {
+    font-family: 'Open Sans', sans-serif;
+}
+
+.left-container h2 {
+    font-size: 18px;
+}
+
+.locker-image {
+    max-width: 96%;
+    margin: 10px 2% 0px 2%;
+}
+
+.info-window button {
+    width: 100%;
+    background: #FFCB04;
+    font-size: 14px;
+    text-transform: capitalize;
+    height: 40px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.info-window button:hover {
+    background: #FFCB04;
+}
+
+.info-window-address {
+    padding: 10px 0;
+    clear:both;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
+    line-height: 15px;
+}
+
+.info-window button, #find-postcode {
+    color: #404041;
+}
+
+.shipping_address {
+    clear: both;
+    overflow: hidden;
+    padding: 0px 30px 20px 20px;
+}
+
+.shipping_address .title {
+    font-weight: 700;
+    padding: 0 0 10px 0;
+}
+
+.shipping_address .locker-selected-info p:last-child {
+    padding: 10px 0 0 0;
+}
+
+.locker-phone {
+    overflow: hidden;
+    clear: both;
+    padding: 20px 0;
+}
+
+.lockers-close {
+    position: absolute;
+    right: 0;
+}
+
+.lockers-close img {
+    width: 35px;
+    cursor:pointer;
+}
+
+.shipping_address.validation_failed {
+    border: 1px solid red;
+}
+
+p.validation_failed {
+    color: red;
+}
+
+.load-overlay-global {
+    overflow: auto;
+}
+
+.load-overlay, .load-overlay-global {
+    display: none;
+}
+
+.load-overlay .overlay, .load-overlay-global .overlay {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    opacity: 0.4;
+    z-index: 1;
+}
+
+.overlay-logo-container {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.overlay-logo {
+    animation-name: zoomingIn;
+    animation-direction: alternate;
+    animation-duration: 0.3s;
+    animation-iteration-count: 100;
+}
+
+@keyframes zoomingIn {
+    from {
+        transform: scale(0.7);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+.locker-help {
+    color: #aaa;
+    font-size: 12px;
+    padding: 0 0 10px 0;
+}
+
+.shipping_address .container {
+    width: 50%;
+}
+
+.locker-phone label .grey {
+    font-family: "Helvetica Neue", Verdana, Arial, sans-serif;
+    color: #aaa;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.lockers .lockers-content .top {
+    height: 12%;
+    max-height: 90px;
+    padding: 30px 0 15px 0;
+    min-height: 70px;
+    box-sizing: border-box;
+}
+
+.lockers .lockers-content .bottom {
+    height: 88%;
+}
+
+.inpost-popup {
+    background-color: white;
+    display: none;
+    position: fixed;
+    width: auto;
+    max-width: 80%;
+    height: auto;
+    font-family: 'Open Sans', sans-serif;
+    z-index: 10;
+    padding-bottom: 20px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.block-center {
+    margin: 0 auto;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.font-size-20 {
+    font-size: 20px;
+}
+
+.inpost-popup .inpost-content {
+    margin: 0 auto;
+    font-size: 16px;
+    max-width: 800px;
+    color: black;
+}
+
+.hidden-on-mobile {
+    display: block;
+}
+
+.is-mobile {
+    display: none;
+}
+
+.inpost-popup .inpost-content img {
+    max-width: 100%;
+}
+
+.inpost-popup .inpost-content .inpost-title {
+    background: #ffcb08;
+    display: inline-block;
+    padding: 8px 26px;
+    font-size: 18px;
+    transform: rotate(-0.5deg);
+    margin-top: 20px;
+}
+
+.inpost-popup .inpost-content p {
+    padding: 0 20px;
+    margin: 16px 0;
+    font-size: 16px;
+}
+
+.shipping-inpost-logo{
+    width: 50px;
+    display: inline-block;
+    float: none;
+    vertical-align: middle;
+    margin: 0;
+}
+
+#checkout-shipping-method-load .shipping-inpost-logo {
+    margin-right: 5px;
+    margin-top: -4px;
+    width: 52px;
+}
+
+@media only screen and (max-width: 760px) {
+    .hidden-on-mobile {
+        display: none;
+    }
+    .is-mobile {
+        display: block;
+    }
+    .inpost-popup {
+        max-width: 98%;
+        width: 100%;
+    }
+}
+
+@media only screen and (max-width: 1300px) {
+    .inpost-popup {
+        width: 70%;
+    }
+    .points {
+        height: calc(100% - 54px);
+    }
+}
+
+@media only screen and (max-width: 435px) {
+    #co-billing-form .form-list .control label {
+        font-size: 12px;
+    }
+    .shipping-inpost-logo {
+        width: 40px;
+    }
+}
+
+.inpost-link.button {
+    background: #000;
+}
+
+#inpostPopup {
+    color:black;
+}
+
+.show-more-mobile {
+    display: none;
+}
+
+.lockers-mobile .left-container .points {
+    width: calc(100vw - 30px);
+    overflow: auto;
+    white-space: nowrap;
+}
+
+.lockers-mobile .left-container .points .point {
+    width: 250px;
+    display: inline-block;
+    white-space: initial;
+    vertical-align: top;
+}
+
+.lockers-mobile .left-container h2 {
+    font-weight: 700;
+    font-size: 14px;
+    margin-top: 5px;
+    text-align: center;
+}
+
+.lockers-mobile #map {
+    width: 100%;
+    height: 300px;
+    margin: 10px 0;
+}
+
+.lockers-mobile .point-content .title .left {
+    float:none;
+    padding: 5px;
+}
+
+.lockers-mobile .point-content .title .right {
+    float:none;
+    padding: 0 5px;
+}
+
+.lockers-mobile input.lockers-postcode {
+    width: 80%;
+    height: 30px;
+    border: 1px solid black;
+    padding: 0 10px;
+}
+
+.lockers-mobile button.find-postcode {
+    background: #FFCB04;
+    height: 30px;
+    border: 1px solid #FFCB04;
+    width: 20%;
+}
+
+.lockers-mobile button.select {
+    border: 1px solid;
+    border-top: none;
+}
+
+.lockers-mobile .left-container h2 {
+    font-family: 'Open Sans', sans-serif;
+}
+
+.lockers-mobile .show-more.select {
+    display: none;
+}
+
+.lockers-mobile .left-container .points .point.show-more-mobile {
+    width: 100px;
+}
+
+.show-more-mobile .round {
+    width: 50px;
+    height: 50px;
+    margin: 63px 23px;
+    border: 1px solid;
+    border-radius: 32px;
+    box-shadow: 0px 1px;
+}
+
+.show-more-mobile .round img {
+    width: 25px;
+    margin: 12px;
+}
+
+@media only screen and (max-width: 770px) and (min-width: 750px) {
+    .point-content .title .right {
+        width: 23%;
+    }
+
+    .point-content .title .left {
+        width: 61%;
+    }
+}
+
+@media only screen and (max-width: 1025px) and (min-width: 1023px) {
+    .point-content .title .left {
+        width: 61%;
+    }
+}
+
+@media only screen and (max-width: 600px)  {
+    .inpost-popup {
+        width: 98%;
+    }
+    .input-different-shipping label, input#id_create_account + label {
+        font-size: 12px;
+    }
+    .inpost-popup .inpost-content p {
+        font-size: 13px;
+    }
+}
+
+.inpost-popup .top-container .inpost-video {
+    display: none;
+    width: 100%;
+    min-height: 300px;
+}
+
+.lockers-mobile .title .left, .lockers-mobile .title .right {
+    display: block;
+}
+
+.inpost-link {
+    background: #000;
+    display: inline-block;
+    padding: 7px 15px !important;
+    border: 0;
+    color: #FFFFFF !important;
+    font-size: 13px;
+    font-weight: normal;
+    font-family: "Raleway", "Helvetica Neue", Verdana, Arial, sans-serif;
+    line-height: 19px;
+    text-align: center;
+    text-transform: uppercase;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.inpost-link:hover {
+    background: #3399cc;
+}
+
+.address p, .info-window-address p{
+    margin: 0;
+}
+
+
+.selected-container .shipping_address p {
+    margin: 0;
+}
+
+input[type=text].validate-uk-phone {
+    width: 210px;
+}

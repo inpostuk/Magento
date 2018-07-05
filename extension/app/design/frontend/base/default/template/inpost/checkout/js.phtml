@@ -1,0 +1,75 @@
+<?php
+/**
+ * (c) InPost UK Ltd <support@inpost.co.uk>
+ * This source file is subject to the license that is bundled
+ * with this source code in the file LICENSE.
+ *
+ * Built by NMedia Systems Ltd, <info@nmediasystems.com>
+ */
+?>
+
+<?php $helper = Mage::helper('inpost_lockers') ?>
+<?php if ($helper->isActive()) : ?>
+    <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js">
+    </script>
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=<?php echo Mage::helper('inpost_lockers')->getGoogleMapsKey() ?>">
+    </script>
+
+    <div class="load-overlay-global">
+        <div class="overlay"></div>
+        <div class="overlay-logo-container">
+            <img class="overlay-logo" src="<?php echo $this->getSkinUrl('images/inpost/inpost.png') ?>"/>
+        </div>
+    </div>
+
+    <div class="inpost-popup">
+        <div class="lockers-close">
+            <img src="<?php echo $this->getSkinUrl('images/inpost/close.png') ?>"/>
+        </div>
+        <div class="inpost-content text-center">
+
+            <p class="top-container">
+                <img class="block-center" src="<?php echo $this->getSkinUrl('images/inpost/inpost-popup-logo.png') ?>"/>
+                <iframe class="inpost-video"
+                        src="https://www.youtube.com/embed/FlHeMLj_A7Q">
+                </iframe>
+            </p>
+            <p><b>Collect your order at a time and place that suits you in just a few seconds!</b></p>
+            <p>Choose from <?php echo $this->getLocationsCount() ?> lockers nationwide, which all are accessible 24 hours a day, 7 days a week.
+            <br/>That means no more waiting in or depot queues.</p>
+            <p>InPost will notify you via text and email you when your order is ready to collect. <br/> You will then have 72 hours to collect your parcel.</p>
+            <a class="inpost-link button" href="#">Watch Video <i
+                        class="fa fa-angle-right" aria-hidden="true"></i></a>
+        </div>
+    </div>
+<?php else: ?>
+    <style>
+        .inpost_span {
+            display: none;
+        }
+    </style>
+<?php endif; ?>
+
+<script type="text/javascript">
+    (function ($) {
+        $('.inpost-popup .inpost-link.button').on('click', function() {
+            $('.inpost-popup .top-container .block-center').hide();
+            $(this).hide();
+            $('.inpost-popup .top-container .inpost-video').show();
+        });
+
+        $('.inpost-popup .lockers-close').on('click', function () {
+            $('.load-overlay-global').hide();
+            $('.inpost-popup').hide();
+            $('iframe').attr('src', $('iframe').attr('src'));
+        });
+
+        $('.load-overlay-global').on('click', function () {
+            $('.load-overlay-global').hide();
+            $('.inpost-popup').hide();
+            $('iframe').attr('src', $('iframe').attr('src'));
+        });
+
+    })(jQuery);
+</script>

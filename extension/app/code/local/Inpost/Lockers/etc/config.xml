@@ -1,0 +1,251 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Inpost_Lockers>
+            <version>0.1.4</version>
+        </Inpost_Lockers>
+    </modules>
+    <global>
+        <models>
+            <inpost_lockers>
+                <class>Inpost_Lockers_Model</class>
+                <resourceModel>inpost_lockers_resource</resourceModel>
+            </inpost_lockers>
+            <inpost_lockers_resource>
+                <class>Inpost_Lockers_Model_Resource</class>
+                <entities>
+                    <machine>
+                        <table>inpost_machine</table>
+                    </machine>
+                </entities>
+            </inpost_lockers_resource>
+        </models>
+        <blocks>
+            <inpost_lockers>
+                <class>Inpost_Lockers_Block</class>
+            </inpost_lockers>
+            <sales>
+                <rewrite>
+                    <order_view>Inpost_Lockers_Block_Sales_Order_View</order_view>
+                </rewrite>
+            </sales>
+            <!--<onestepcheckout>
+                <rewrite>
+                    <checkout>Inpost_Lockers_Block_OneStepCheckout_Checkout</checkout>
+                </rewrite>
+            </onestepcheckout>-->
+        </blocks>
+        <helpers>
+            <inpost_lockers>
+                <class>Inpost_Lockers_Helper</class>
+            </inpost_lockers>
+        </helpers>
+        <resources>
+            <inpost_lockers_setup>
+                <setup>
+                    <module>Inpost_Lockers</module>
+                </setup>
+            </inpost_lockers_setup>
+        </resources>
+        <fieldsets>
+            <sales_convert_quote>
+                <locker_id>
+                    <to_order>*</to_order>
+                </locker_id>
+            </sales_convert_quote>
+        </fieldsets>
+        <sales>
+            <order>
+                <statuses>
+                    <inpost_shipped translate="label">
+                        <label>Inpost Shipped</label>
+                    </inpost_shipped>
+                    <delivered translate="label">
+                        <label>InPost Delivered</label>
+                    </delivered>
+                    <inpost_stored translate="label">
+                        <label>InPost Stored24</label>
+                    </inpost_stored>
+                    <inpost_expired translate="label">
+                        <label>InPost Expired</label>
+                    </inpost_expired>
+                    <inpost_returnedtoagency translate="label">
+                        <label>InPost Returned2Agency</label>
+                    </inpost_returnedtoagency>
+                    <inpost_deliveredtoagency translate="label">
+                        <label>InPost Delivered2Agency</label>
+                    </inpost_deliveredtoagency>
+                    <inpost_labelexpired translate="label">
+                        <label>InPost LabelExpired</label>
+                    </inpost_labelexpired>
+                    <inpost_notdelivered translate="label">
+                        <label>InPost NotDelivered</label>
+                    </inpost_notdelivered>
+                    <inpost_claimed translate="label">
+                        <label>InPost Claimed</label>
+                    </inpost_claimed>
+                    <inpost_missing translate="label">
+                        <label>InPost Missing</label>
+                    </inpost_missing>
+                    <inpost_cancelled translate="label">
+                        <label>InPost Missing</label>
+                    </inpost_cancelled>
+                </statuses>
+                <states>
+                    <shipped default="0"/>
+                </states>
+            </order>
+        </sales>
+    </global>
+    <frontend>
+        <layout>
+            <updates>
+                <packagename_modulename>
+                    <file>inpost_lockers.xml</file>
+                </packagename_modulename>
+            </updates>
+        </layout>
+        <routers>
+            <inpost>
+                <use>standard</use>
+                <args>
+                    <frontName>inpost</frontName>
+                    <module>Inpost_Lockers</module>
+                </args>
+            </inpost>
+            <onestepcheckout>
+                <args>
+                    <modules>
+                        <inpost_lockers before="Idev_OneStepCheckout">Inpost_Lockers</inpost_lockers>
+                    </modules>
+                </args>
+            </onestepcheckout>
+        </routers>
+        <translate>
+            <modules>
+                <translations>
+                    <files>
+                        <inpost_lockers>InPost_Lockers.csv</inpost_lockers>
+                    </files>
+                </translations>
+            </modules>
+        </translate>
+        <events>
+            <controller_action_predispatch_checkout_onepage_index>
+                <observers>
+                    <inpost_lockers>
+                        <class>inpost_lockers/observer</class>
+                        <type>singleton</type>
+                        <method>controllerActionPredispatchCheckoutOnepage</method>
+                    </inpost_lockers>
+                </observers>
+            </controller_action_predispatch_checkout_onepage_index>
+            <sales_order_place_after>
+                <observers>
+                    <inpost_lockers_order_after>
+                        <class>inpost_lockers/observer</class>
+                        <type>singleton</type>
+                        <method>salesOrderPlaceAfter</method>
+                    </inpost_lockers_order_after>
+                </observers>
+            </sales_order_place_after>
+            <sales_order_place_before>
+                <observers>
+                    <inpost_lockers_order_before>
+                        <class>inpost_lockers/observer</class>
+                        <type>singleton</type>
+                        <method>salesOrderPlaceBefore</method>
+                    </inpost_lockers_order_before>
+                </observers>
+            </sales_order_place_before>
+        </events>
+    </frontend>
+
+    <default>
+        <carriers>
+            <inpost_lockers>
+                <active>0</active>
+                <parcel_create>1</parcel_create>
+                <model>inpost_lockers/carrier</model>
+                <title>InPost 24/7 Lockers</title>
+                <method>InPost Next Day Locker Collection</method>
+                <sort_order>0</sort_order>
+                <sallowspecific>0</sallowspecific>
+                <express_max_weight>20000</express_max_weight>
+                <price>2.99</price>
+                <endpoint>https://api-uk.easypack24.net/v4/</endpoint>
+                <map_radius>10</map_radius>
+                <weight>kg</weight>
+                <default_size>a</default_size>
+                <sallowspecific>0</sallowspecific>
+                <description>Collection next day if ordered before 6pm, Sunday to Friday only.</description>
+                <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>
+            </inpost_lockers>
+            <inpost>
+                <model>inpost_lockers/carrier</model>
+            </inpost>
+        </carriers>
+    </default>
+
+    <crontab>
+        <jobs>
+            <inpost_lockers_machines>
+                <schedule>
+                    <cron_expr>15 3 * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>inpost_lockers/cron::getMachinesFromApi</model>
+                </run>
+            </inpost_lockers_machines>
+            <inpost_lockers_update_order_statuses>
+                <schedule>
+                    <cron_expr>15 8,12,16 * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>inpost_lockers/cron::updateInpostOrderStatuses</model>
+                </run>
+            </inpost_lockers_update_order_statuses>
+        </jobs>
+    </crontab>
+
+    <adminhtml>
+        <layout>
+            <updates>
+                <packagename_modulename>
+                    <file>inpost_lockers.xml</file>
+                </packagename_modulename>
+            </updates>
+        </layout>
+        <events>
+            <sales_order_shipment_save_before>
+                <observers>
+                    <inpost_lockers_shipment_before>
+                        <class>inpost_lockers/observer</class>
+                        <type>singleton</type>
+                        <method>salesOrderShipmentSaveBefore</method>
+                    </inpost_lockers_shipment_before>
+                </observers>
+            </sales_order_shipment_save_before>
+            <sales_order_shipment_save_after>
+                <observers>
+                    <inpost_lockers_shipment_before>
+                        <class>inpost_lockers/observer</class>
+                        <type>singleton</type>
+                        <method>salesOrderShipmentSaveAfter</method>
+                    </inpost_lockers_shipment_before>
+                </observers>
+            </sales_order_shipment_save_after>
+        </events>
+    </adminhtml>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <Inpost_Lockers before="-">Inpost_Lockers_Adminhtml</Inpost_Lockers>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+</config>

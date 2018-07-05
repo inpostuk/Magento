@@ -1,0 +1,162 @@
+<?php
+/**
+ * (c) InPost UK Ltd <support@inpost.co.uk>
+ * This source file is subject to the license that is bundled
+ * with this source code in the file LICENSE.
+ *
+ * Built by NMedia Systems Ltd, <info@nmediasystems.com>
+ */
+?>
+<?php
+$items = $this->getNearesItems();
+?>
+<div class="left-container">
+    <input type="hidden" id="postcode-hidden" value="<?php echo $this->getPostcodeHiddenValue() ?>"/>
+    <input type="hidden" id="limit-hidden"/>
+    <h2><span id="points-count"><?php echo $this->getStoresFound(); ?></span> <?php echo $this->__('lockers found nearby') ?></h2>
+    <?php if (count($items)): ?>
+        <div class="points">
+            <?php $i = 1; ?>
+            <?php foreach ($items as $item) : ?>
+                <div class="point" data-id="<?php echo $i; ?>">
+                    <div class="point-content">
+                        <div class="title">
+                            <p class="left"><?php echo $i; ?> - <?php echo preg_replace("|inpost locker-|i", "", $item->getData('building_no')); ?></p>
+                            <p class="right"><span
+                                        class="distance"><?php echo round($item->getData('distance'), 1); ?>
+                                    miles</span></p>
+                        </div>
+                        <div class="address">
+                            <p><?php echo $item->getStreet(); ?>,</p>
+                            <p><?php echo $item->getCity(); ?>, <?php echo $item->getPostCode(); ?></p>
+                        </div>
+                        <p class="opening-hours"><?php echo strlen(trim($item->getOperatingHours())) ? $item->getOperatingHours() : $this->__('Accessible 24/7') ?></p>
+                        <div class="hours">
+                            <div>
+                            	<?php echo $item->getLocationDescription(); ?>
+                                <?php
+                                $file_headers = @get_headers('https://geowidget.easypack24.net/uploads/uk/images/'.$item->getData('id') .'.jpg');
+                                if($file_headers && $file_headers[0] !== 'HTTP/1.1 404 Not Found'): ?>
+                                    <img class="locker-image" src="https://geowidget.easypack24.net/uploads/uk/images/<?php echo $item->getData('id'); ?>.jpg"/>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <button name="select" class="select" row-id="<?php echo $item->getId(); ?>"
+                            onclick="selectPoint(event)"><?php echo $this->__('Select') ?></button>
+                </div>
+            <?php $i++; ?>
+            <?php endforeach; ?>
+            <div class="point show-more-mobile">
+                <div class="point-content">
+                    <div class="round">
+                        <img src="<?php echo $this->getSkinUrl('images/inpost/arrow_yellow.png') ?>"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php else: ?>
+        <h5><?php echo $this->__("There're no lockers in your area.") ?></h5>
+    <?php endif; ?>
+</div>
+
+<script type="text/javascript">
+    (function ($) {
+        $('.opening-hours').on('click', function () {
+            $(this).toggleClass('active');
+        });
+
+        $('.show-more-mobile').on('click', function (event) {
+            event.preventDefault();
+            var type = 'desktop';
+            if ($(window).width() < 450) {
+                type = 'mobile';
+            }
+            var postcode = $('#postcode-hidden').val();
+            var limit = $('#limit-hidden').val();
+            if (!limit) {
+                limit = 10;
+            } else {
+                limit = parseInt(limit) + 5;
+            }
+            var url = '<?php echo Mage::getBaseUrl() ?>/inpost/lockers/updatemapdata/postcode/' + postcode + '/limit/' + limit;
+            $.ajax({
+                url: url,
+                beforeSend: function() {
+                    if (type == 'desktop') {
+                        $('.load-overlay').show();
+                    } else {
+                        $('.load-overlay-global').show();
+                    }
+                },
+                success: function (response) {
+                    response = JSON.parse(response);
+                    if (response['error']) {
+                        alert(response['error']);
+                        return;
+                    }
+                    if (type == 'desktop') {
+                        $('.lockers-content .left .container').children().remove();
+                        $('.lockers-content .left .container').append(response['left']);
+                    } else {
+                        $('.lockers-content .middle .container').children().remove();
+                        $('.lockers-content .middle .container').append(response['left']);
+                    }
+                    var coordinates = JSON.parse(response['center']);
+                    initMap(JSON.parse(response['locations']), parseFloat(coordinates.lat), parseFloat(coordinates.lng));
+                    $('#limit-hidden').val(limit);
+                    if (parseInt($('#points-count').text()) <= parseInt(limit)) {
+                        $('.show-more-mobile').hide();
+                    }
+                    if (type == 'desktop') {
+                        $('.load-overlay').hide();
+                    } else {
+                        $('.load-overlay-global').hide();
+                    }
+                }
+            });
+        });
+    })(jQuery);
+
+    function selectPoint(event) {
+        event.preventDefault();
+        var lockerId = jQuery(event.target).attr('row-id');
+        var j = jQuery;
+        var type = 'desktop';
+        if (j(window).width() < 450) {
+            type = 'mobile';
+        }
+        var onepageCheckout = j('#onepage').val();
+        j.ajax({
+            url: '<?php echo Mage::getBaseUrl() ?>/inpost/lockers/setlocker/id/' + lockerId + '/quote_id/' + j('#quote_id').val() + '/onepage/' + onepageCheckout,
+            beforeSend: function() {
+                if (type == 'desktop') {
+                    j('.load-overlay').show();
+                } else {
+                    j('.load-overlay-global').show();
+                }
+            },
+            success: function(response) {
+                response = JSON.parse(response);
+                if (response['success'] == true) {
+                    j('.selected-container .validation_failed').remove();
+                    j('.lockers').remove();
+                    if (onepageCheckout == '1') {
+                        j('#shipping-progress-opcheckout').children().remove();
+                        j('#shipping-progress-opcheckout').append(response['address_block'])
+                    }
+                    j('.shipping_address').remove();
+                    j('.selected-container').prepend(response['selected_locker']);
+                } else {
+
+                }
+                if (type == 'desktop') {
+                    j('.load-overlay').hide();
+                } else {
+                    j('.load-overlay-global').hide();
+                    document.getElementById('locker-selected-info').scrollIntoView();
+                }
+            }
+        });
+    }
+</script>

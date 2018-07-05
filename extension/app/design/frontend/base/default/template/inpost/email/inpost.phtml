@@ -1,0 +1,40 @@
+<?php
+/**
+ * (c) InPost UK Ltd <support@inpost.co.uk>
+ * This source file is subject to the license that is bundled
+ * with this source code in the file LICENSE.
+ *
+ * Built by NMedia Systems Ltd, <info@nmediasystems.com>
+ */
+?>
+
+<?php $order = $this->getOrder(); ?>
+
+<?php if ($order->getId() && strpos($order->getShippingMethod(), 'inpost_lockers') !== false) : ?>
+    <tr>
+        <?php $shipping = $order->getShippingAddress(); ?>
+        <?php $locker = Mage::getModel('inpost_lockers/machine')->load($order->getLockerId()); ?>
+        <td class="inpost_td">
+            <h2><b><?php echo $this->__('Collection details'); ?></b></h2>
+            <p><?php echo $this->__('You will receive a text as soon as your items are ready to collect. Please bring a copy of your order confirmation with you.'); ?></p>
+            <h4><?php echo $this->__('Collection address:') ?></h4>
+            <ul style="list-style: none; padding-left: 0px;">
+                <li><b><?php echo $shipping->getCompany() ?></b></li>
+                <li><?php echo $locker->getLocationDescription() ?></li>
+                <li><?php echo $locker->getStreet(); ?>, <?php echo $locker->getCity(); ?></li>
+                <li><?php echo $locker->getProvince(); ?></li>
+                <li><?php echo $shipping->getPostcode(); ?></li>
+            </ul>
+            <h3><b><?php echo $this->__('Opening Hours:'); ?></b></h3>
+            <p><?php echo $this->__('Open 24/7') ?></p>
+        </td>
+    </tr>
+    <style>
+        .inpost_td {
+            padding: 10px 15px 0 !important;
+        }
+        .inpost_td ul {
+            list-style: none;
+        }
+    </style>
+<?php endif; ?>

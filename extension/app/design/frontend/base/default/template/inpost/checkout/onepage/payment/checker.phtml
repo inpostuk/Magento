@@ -1,0 +1,31 @@
+<?php
+/**
+ * (c) InPost UK Ltd <support@inpost.co.uk>
+ * This source file is subject to the license that is bundled
+ * with this source code in the file LICENSE.
+ *
+ * Built by NMedia Systems Ltd, <info@nmediasystems.com>
+ */
+?>
+<script type="text/javascript">
+    (function ($) {
+
+        var url = '/inpost/lockers/checkShippingMethod/';
+
+        $.ajax({
+            url: url + 'quote_id/<?php echo $this->getQuoteId() ?>/old_address/' + $('#hidden_old_address').val() + '/phone/' + $('#locker-phone').val(),
+            success: function(response) {
+                response = JSON.parse(response);
+                $('#shipping-progress-opcheckout').children().remove();
+                $('#shipping-progress-opcheckout').append(response['address_block']);
+                if (!response['validation']) {
+                    $('p.validation_failed').remove();
+                    $('.shipping_address').before('<p class="validation_failed">Please select locker.</p>');
+                    $('.shipping_address').addClass('validation_failed');
+                    checkout.changeSection('opc-shipping_method');
+                }
+            }
+        });
+
+    })(jQuery);
+</script>

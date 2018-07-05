@@ -1,0 +1,143 @@
+<?php
+/**
+ * (c) InPost UK Ltd <support@inpost.co.uk>
+ * This source file is subject to the license that is bundled
+ * with this source code in the file LICENSE.
+ *
+ * Built by NMedia Systems Ltd, <info@nmediasystems.com>
+ */
+?>
+<?php if ($this->isBlockAvailable()) : ?>
+    <?php $order = $this->getOrder(); ?>
+    <div class="box-right">
+        <input type="hidden" name="order_id" id="order_id" value="<?php echo $this->getOrderId(); ?>"/>
+        <div class="entry-edit">
+            <div class="entry-edit-head">
+                <h4 class="icon-head head-products"><?php echo Mage::helper('sales')->__('Parcel') ?></h4>
+            </div>
+            <fieldset>
+                <div>
+                    <div id="fieldset" class="grid">
+                        <table style="border: none;">
+                            <tbody style="background: none;">
+                            <tr>
+                                <td style="border: none;">
+                                    <label style="padding-right: 5px;">Weight</label>
+                                    <input class="required-entry" type="number" name="weight" id="weight" value="<?php echo $this->getTotalWeight(); ?>"/>
+                                    <span><?php echo Mage::getStoreConfig('carriers/inpost_lockers/weight') ?></span>
+                                </td>
+                                <td style="border: none;">
+                                    <label style="float: left; padding-right: 5px;">Size class</label>
+                                    <div style="float: left;">
+                                        <select name="size" class="required-entry" id="size">
+                                            <?php $defaultSize = $this->getDefaultSize() ?>
+                                            <?php foreach ($this->getSizes() as $value => $size) : ?>
+                                                <option <?php echo ($value == $defaultSize) ? 'selected="selected"' : ''; ?> value="<?php echo $value ?>"><?php echo $size ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <ul class="size-table">
+                                            <li>
+                                                <p>Size A: 8 cm x 38 cm x 64 cm</p>
+                                            </li>
+                                            <li>
+                                                <p>Size B: 19 cm x 38 cm x 64 cm</p>
+                                            </li>
+                                            <li>
+                                                <p>Size C: 41 cm x 38 cm x 64 cm</p>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div style="padding: 10px 0;" class="left">
+
+                        </div>
+                        <div style="padding:0 0 10px 0;">
+
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        document.observe('dom:loaded', function(){
+            window.itemsJson = '<?php echo $this->getItemsJson(); ?>';
+            $$('.qty-item').each(function(element) {
+                element.observe('change', function (event) {
+                    var items = JSON.parse(window.itemsJson);
+                    var weight = 0;
+                    $$('.qty-item').each(function(element) {
+                        var id = element.name;
+                        id = id.replace(']', '');
+                        id = id.replace('shipment[items[', '');
+                        id = id.replace(']', '');
+                        var qty = element.value;
+                        weight += parseFloat(qty * items[id]);
+                    });
+                    $('weight').value = weight;
+                });
+            })
+        });
+
+        function createParcel() {
+            event.preventDefault();
+            var validated = false;
+            var weightInput = document.getElementById('weight');
+            var sizeInput = document.getElementById('size');
+            weightInput.className = 'required-entry';
+            sizeInput.className = 'required-entry';
+            if (weightInput.value && sizeInput.value !== "0") {
+                validated = true;
+            } else {
+                if (!weightInput.value) {
+                    weightInput.className = 'validation-failed required-entry';
+                }
+                if (sizeInput.value == '0') {
+                    sizeInput.className = 'validation-failed required-entry';
+                }
+            }
+            if (validated) {
+                var url = "<?php echo Mage::helper('adminhtml')->getUrl('adminhtml/lockers/createparcel', array('_secure' => true)); ?>";
+                var params = {
+                    'weight': weightInput.value,
+                    'size': sizeInput.value,
+                    'order_id': document.getElementById('order_id').value
+                };
+                new Ajax.Request(url, {
+                    method: 'POST',
+                    parameters: params,
+                    requestHeaders: {Accept: 'application/json'},
+                    onSuccess: function (transport) {
+                        var response = transport.responseText.evalJSON(true);
+                        if (response['error'] == true) {
+                            window.location.reload();
+                        }
+                        document.getElementById('fieldset').update("<table cellspacing='0'>" +
+                            "<thead>" +
+                            "<tr class='headings'>" +
+                            "<th>ID</th>" +
+                            "<th>Phone</th>" +
+                            "<th>Machine ID</th>" +
+                            "<th>Service</th>" +
+                            "</tr>" +
+                            "</thead>" +
+                            "<tbody>" +
+                            "<tr>" +
+                            "<td>" + response['id'] + "</td>" +
+                            "<td>" + response['receiver_phone'] + "</td>" +
+                            "<td>" + response['target_machine_id'] + "</td>" +
+                            "<td>" + response['service'] + "</td>" +
+                            "</tr>" +
+                            "</tbody>" +
+                            "</table>");
+                    }
+                });
+            }
+        }
+    </script>
+
+<?php endif; ?>

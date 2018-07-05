@@ -1,0 +1,195 @@
+<?php
+/**
+ * (c) InPost UK Ltd <support@inpost.co.uk>
+ * This source file is subject to the license that is bundled
+ * with this source code in the file LICENSE.
+ *
+ * Built by NMedia Systems Ltd, <info@nmediasystems.com>
+ */
+?>
+<?php if ($this->getAppType() == 'desktop') : ?>
+<div class="lockers">
+    <input type="hidden" name="quote_id" id="quote_id" value="<?php echo $this->getQuoteId(); ?>"/>
+    <input type="hidden" name="onepage" id="onepage" value="<?php echo $this->isOnepageCheckout(); ?>"/>
+    <div class="lockers-overlay"></div>
+    <div class="lockers-content">
+        <div class="lockers-close"><img onclick="closePopup();" src="<?php echo $this->getSkinUrl('images/inpost/close.png') ?>"/></div>
+        <div class="top">
+            <div class="middle">
+                <input class="lockers-postcode left" id="lockers-postcode" name="lockers-postcode"
+                       value="<?php echo $this->getPostcode() ?>" placeholder="Type in your postcode or town..."/>
+                <button class="find-postcode"
+                        id="find-postcode"><?php echo $this->__('Find') ?></button>
+            </div>
+        </div>
+        <div class="bottom">
+            <div class="left">
+                <div class="container">
+                    <?php echo $this->getChildHtml('lockers.left'); ?>
+                </div>
+                <button class="show-more select"><?php echo $this->__('Show more') ?></button>
+            </div>
+            <div class="right">
+                <?php echo $this->getChildHtml('lockers.map') ?>
+            </div>
+            <div class="load-overlay">
+                <div class="overlay"></div>
+                <div class="overlay-logo-container">
+                    <img class="overlay-logo" src="<?php echo $this->getSkinUrl('images/inpost/inpost.png') ?>"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php else: ?>
+    <div id="lockers-mobile" class="lockers-mobile">
+        <input type="hidden" name="quote_id" id="quote_id" value="<?php echo $this->getQuoteId(); ?>"/>
+        <input type="hidden" name="onepage" id="onepage" value="<?php echo $this->isOnepageCheckout(); ?>"/>
+        <div class="lockers-content">
+            <div class="top">
+                <div class="middle">
+                    <input class="lockers-postcode left" id="lockers-postcode" name="lockers-postcode"
+                           value="<?php echo $this->getPostcode() ?>"/>
+                    <button class="find-postcode"
+                            id="find-postcode"><?php echo $this->__('Find') ?></button>
+                </div>
+            </div>
+            <div class="middle">
+                <div class="container">
+                    <?php echo $this->getChildHtml('lockers.left'); ?>
+                </div>
+                <button class="show-more select"><?php echo $this->__('Show more') ?></button>
+            </div>
+            <div class="bottom">
+                <?php echo $this->getChildHtml('lockers.map') ?>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
+<script type="text/javascript">
+    function closePopup() {
+        jQuery('.lockers').remove();
+    }
+    (function ($) {
+
+        $(document).ready(function () {
+            initMap();
+        });
+
+        $('.find-postcode').on('click', function (event) {
+            event.preventDefault();
+            var type = 'desktop';
+            if ($(window).width() < 450) {
+                type = 'mobile';
+            }
+            var postcode = $('#lockers-postcode').val();
+            if (!postcode) {
+                alert('Please enter valid postcode.');
+            }
+            var url = '<?php echo Mage::getBaseUrl() ?>/inpost/lockers/updatemapdata/postcode/' + postcode;
+            $.ajax({
+                url: url,
+                beforeSend: function() {
+                    if (type == 'desktop') {
+                        $('.load-overlay').show();
+                    } else {
+                        $('.load-overlay-global').show();
+                    }
+                },
+                success: function (response) {
+                    response = JSON.parse(response);
+                    if (response['error']) {
+                        alert(response['error']);
+                        return;
+                    }
+                    if (type == 'desktop') {
+                        $('.lockers-content .left .container').children().remove();
+                        $('.lockers-content .left .container').append(response['left']);
+                    } else {
+                        $('.lockers-content .middle .container').children().remove();
+                        $('.lockers-content .middle .container').append(response['left']);
+                    }
+                    var coordinates = JSON.parse(response['center']);
+                    initMap(JSON.parse(response['locations']), parseFloat(coordinates.lat), parseFloat(coordinates.lng));
+                    if (parseInt($('#points-count').text()) >= 5) {
+                        $('.select.show-more').show();
+                    } else {
+                        $('.select.show-more').hide();
+                    }
+                },
+                complete: function() {
+                    if (type == 'desktop') {
+                        $('.load-overlay').hide();
+                    } else {
+                        $('.load-overlay-global').hide();
+                    }
+                }
+            });
+        });
+
+        $('.show-more.select').on('click', function (event) {
+            event.preventDefault();
+            var type = 'desktop';
+            if ($(window).width() < 450) {
+                type = 'mobile';
+            }
+            var postcode = $('#postcode-hidden').val();
+            var limit = $('#limit-hidden').val();
+            if (!limit) {
+                limit = 10;
+            } else {
+                limit = parseInt(limit) + 5;
+            }
+            var url = '<?php echo Mage::getBaseUrl() ?>/inpost/lockers/updatemapdata/postcode/' + postcode + '/limit/' + limit;
+            $.ajax({
+                url: url,
+                beforeSend: function() {
+                    if (type == 'desktop') {
+                        $('.load-overlay').show();
+                    } else {
+                        $('.load-overlay-global').show();
+                    }
+                },
+                success: function (response) {
+                    response = JSON.parse(response);
+                    if (response['error']) {
+                        alert(response['error']);
+                        return;
+                    }
+                    if (type == 'desktop') {
+                        $('.lockers-content .left .container').children().remove();
+                        $('.lockers-content .left .container').append(response['left']);
+                    } else {
+                        $('.lockers-content .middle .container').children().remove();
+                        $('.lockers-content .middle .container').append(response['left']);
+                    }
+                    var coordinates = JSON.parse(response['center']);
+                    initMap(JSON.parse(response['locations']), parseFloat(coordinates.lat), parseFloat(coordinates.lng));
+                    $('#limit-hidden').val(limit);
+                    if (parseInt($('#points-count').text()) <= parseInt(limit)) {
+                        $('.select.show-more').hide();
+                    }
+                },
+                complete: function() {
+                    if (type == 'desktop') {
+                        $('.load-overlay').hide();
+                    } else {
+                        $('.load-overlay-global').hide();
+                    }
+                }
+            });
+        });
+
+        $('#lockers-postcode').on('keypress', function(e) {
+            if (e.which == 13) {
+                $('#find-postcode').trigger('click');
+            }
+        });
+
+        $('.lockers-overlay').on('click', function () {
+            $('.lockers').remove();
+        });
+
+    })(jQuery);
+</script>

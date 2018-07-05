@@ -1,0 +1,168 @@
+<?php
+/**
+ * (c) InPost UK Ltd <support@inpost.co.uk>
+ * This source file is subject to the license that is bundled
+ * with this source code in the file LICENSE.
+ *
+ * Built by NMedia Systems Ltd, <info@nmediasystems.com>
+ */
+?>
+<?php if ($this->isActive()) : ?>
+
+    <?php $locker = $this->getCurrentLocker(); ?>
+    <div class='shipping_address'>
+        <?php if ($locker) : ?>
+            <div><p class="locker-help">
+                    (<?php echo $this->getMethodDescription() ?>
+                    <a href="#" id="inpostPopup"><?php echo $this->__('Find out more') ?></a>)</p></div>
+            <div><p class="title"><?php echo $this->__('Locker selected') ?>:</p></div>
+            <div id="locker-selected-info" class="locker-selected-info">
+                <p><?php echo $locker->getBuildingNo() ?></p>
+                <p><?php echo $locker->getStreet() ?></p>
+                <p><?php echo $locker->getCity() ?>, <?php echo $locker->getPostCode() ?></p>
+                <p><a href="#" id="openWidget"><?php echo $this->__('Change Locker Location') ?></a></p>
+            </div>
+            <div class='locker-phone'>
+                <div class='field'>
+                    <ul>
+                        <li>
+                            <label><?php echo $this->__('Mobile <span class="grey">(InPost will text you when your parcel is ready)</span>') ?><em>*</em></label>
+                        </li>
+                        <li>
+                            <div class='input-box'>
+                                <input type='text' class='input-text required-entry validate-uk-phone' name='locker-phone'
+                                       placeholder='Telephone' id='locker-phone' value='<?php echo $this->getTelephone() ?>'
+                                       required/>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        <?php else: ?>
+            <div>
+                <p class="locker-help">
+                    (<?php echo $this->getMethodDescription() ?>
+                    <a href="#" id="inpostPopup"><?php echo $this->__('Find out more') ?></a>)
+                </p>
+                <div class="container">
+                    <div class='left'>
+                        <p>
+                            <a href="#" id="openWidget"><?php echo $this->__('Choose Locker') ?></a>
+                        </p>
+                        <input type='hidden' class='validate-locker' name='validate-locker'
+                               value='<?php echo $this->getTelephone() ?>'
+                               required/>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <script type="text/javascript">
+            //<![CDATA[
+            (function ($) {
+                $('#inpostPopup').on('click', function () {
+                    $('.load-overlay-global').show();
+                    $('.inpost-popup').show();
+                });
+                $('#locker-phone').change(function() {
+                    $('#review-locker-phone').val($('#locker-phone').val());
+                });
+            })(jQuery);
+
+            Validation.add('validate-locker', 'Please choose locker', function (v) {
+                if (jQuery('input[name=shipping_method]').length > 0) {
+                    if (jQuery('input[name=shipping_method]:checked').val().indexOf('inpost_lockers') >= 0) {
+                        return false
+                    }
+                } else if (jQuery('select[name=shipping_method]').length > 0) {
+                    if (jQuery('select[name=shipping_method]').val().indexOf('inpost_lockers') >= 0) {
+                        return false
+                    }
+                }
+                return true
+            });
+
+            Validation.add('validate-uk-phone', 'Please provide your mobile phone number in this format 077 1234 5678', function (v) {
+                return Validation.get('IsEmpty').test(v) || /^((((\+|00)?447\s?\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3})|(((\+|00)447\s?\d{2}|\(?07\d{2}\)?)\s?\d{3}\s?\d{4})|(((\+|00)447\s?\d{1}|\(?07\d{1}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$/.test(v)
+            });
+
+            //]]>
+        </script>
+    </div>
+
+    <?php
+    $controller = $this->getRequest()->getControllerName();
+    ?>
+
+    <script type="text/javascript">
+        (function ($) {
+            $('input[name=shipping_method]').on('click',  function () {
+                if ($(this).val().indexOf('inpost_lockers') >= 0) {
+                    openWidget();
+                }
+            });
+
+            $('select[name=shipping_method]').on('change', function() {
+                if ($(this).val() == 'inpost_lockers_') {
+                    $('#selected_container').show();
+                    openWidget();
+                } else {
+                    $('#selected_container').hide();
+                }
+            });
+
+            $('#openWidget').on('click', function (event) {
+                event.preventDefault();
+                if ($('input[name=shipping_method]').length) {
+                    $('input[name=shipping_method]').each(function (elem) {
+                        if ($('input[name=shipping_method]').eq(elem).val().indexOf('inpost_lockers') >= 0) {
+                            $('input[name=shipping_method]').eq(elem).trigger('click');
+                        }
+                    });
+                } else if ($('select[name=shipping_method]').length) {
+                    openWidget();
+                } else {
+                    openWidget();
+                }
+            });
+
+            function openWidget() {
+                var type = 'desktop';
+                if ($(window).width() < 450) {
+                    type = 'mobile';
+                }
+                var postcode = '';
+                if ($('[id="billing:postcode"]')) {
+                    postcode = '/postcode/' + $('[id="billing:postcode"]').val();
+                }
+                $.ajax({
+                    url: "<?php echo Mage::getBaseUrl() ?>/inpost/lockers/getwidget/quote_id/<?php echo Mage::getSingleton('checkout/session')->getQuote()->getId(); ?>/onepage/<?php echo $controller; ?>/type/" + type + postcode,
+                    beforeSend: function() {
+                        $('.load-overlay-global').show();
+                    },
+                    success: function (response) {
+                        response = JSON.parse(response);
+                        $('.lockers').remove();
+                        $('.lockers-mobile').remove();
+                        if (type == 'desktop') {
+                            $('body').append(response['html']);
+                        } else {
+                            $('.selected-container').before(response['html']);
+                            document.getElementById('lockers-mobile').scrollIntoView();
+                        }
+                        $('.load-overlay-global').hide();
+                    },
+                    complete: function(response) {
+                        response = JSON.parse(response.responseText);
+                        if (response.error) {
+                            alert(response.error);
+                        }
+                        $('.load-overlay-global').hide();
+                    }
+                });
+            }
+
+        })(jQuery);
+    </script>
+
+<?php endif; ?>

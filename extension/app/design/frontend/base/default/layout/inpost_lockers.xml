@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+
+<!--
+/**
+ * (c) InPost UK Ltd <support@inpost.co.uk>
+ * This source file is subject to the license that is bundled
+ * with this source code in the file LICENSE.
+ *
+ * Built by NMedia Systems Ltd, <info@nmediasystems.com>
+ */
+-->
+
+<layout>
+    <checkout_onepage_index>
+        <update handle="shipping_inpost_lockers"/>
+        <reference name="checkout.onepage.shipping_method.available">
+            <action method="setTemplate">
+                <template>inpost/checkout/onepage/shipping_method/available.phtml</template>
+            </action>
+        </reference>
+    </checkout_onepage_index>
+
+    <paypal_express_review>
+        <update handle="shipping_inpost_lockers"/>
+        <reference name="paypal.express.review">
+            <action method="setTemplate">
+                <template>inpost/paypal/express/review.phtml</template>
+            </action>
+            <block type="inpost_lockers/checkout_selected" name="selected.locker" as="selected_locker"
+                   template="inpost/checkout/onepage/shipping_method/lockers/selected.phtml">
+                <block type="inpost_lockers/checkout_selected" name="selected"
+                       template="inpost/checkout/onepage/shipping_method/lockers/selected/locker.phtml"/>
+            </block>
+        </reference>
+    </paypal_express_review>
+
+    <onestepcheckout_index_index>
+        <reference name="head">
+            <action method="addItem">
+                <type>js</type>
+                <name>inpost/lockers.js</name>
+            </action>
+        </reference>
+        <update handle="shipping_inpost_lockers"/>
+    </onestepcheckout_index_index>
+
+    <shipping_inpost_lockers>
+        <reference name="head">
+            <action method="addItem">
+                <type>skin_css</type>
+                <name>css/inpost/lockers.css</name>
+            </action>
+        </reference>
+        <block type="inpost_lockers/checkout_js" name="js" output="toHtml" template="inpost/checkout/js.phtml"/>
+    </shipping_inpost_lockers>
+
+    <shipping_ajax_lockers>
+        <remove name="root"/>
+        <block type="inpost_lockers/checkout_onepage_shipping_method_lockers" output="toHtml" name="lockers"
+               template="inpost/checkout/onepage/shipping_method/lockers.phtml">
+            <block type="inpost_lockers/checkout_onepage_shipping_method_lockers" name="lockers.left"
+                   template="inpost/checkout/onepage/shipping_method/lockers/left.phtml"/>
+            <block type="inpost_lockers/checkout_onepage_shipping_method_lockers" name="lockers.map"
+                   template="inpost/checkout/onepage/shipping_method/lockers/map.phtml"/>
+        </block>
+    </shipping_ajax_lockers>
+
+    <checkout_onepage_shippingmethod>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>inpost/checkout/onepage/shipping_method/available.phtml</template>
+            </action>
+            <block type="inpost_lockers/checkout_selected" name="selected.locker" as="selected_locker"
+                   template="inpost/checkout/onepage/shipping_method/lockers/selected.phtml">
+                <block type="inpost_lockers/checkout_selected" name="selected"
+                       template="inpost/checkout/onepage/shipping_method/lockers/selected/locker.phtml"/>
+            </block>
+        </reference>
+        <block type="inpost_lockers/checkout_js" name="js" output="toHtml" template="inpost/checkout/hidden.phtml"/>
+    </checkout_onepage_shippingmethod>
+
+    <!--<checkout_onepage_success>
+        <reference name="checkout.success">
+            <action method="setTemplate">
+                <template>inpost/checkout/success.phtml</template>
+            </action>
+        </reference>
+    </checkout_onepage_success>-->
+
+    <sales_order_shipment>
+        <reference name="sales.order.shipment">
+            <action method="setTemplate">
+                <template>inpost/sales/order/shipment/items.phtml</template>
+            </action>
+        </reference>
+    </sales_order_shipment>
+
+    <onestepcheckout_index_index>
+        <update handle="shipping_inpost_lockers"/>
+        <block type="core/template" name="inpost" output="toHtml" after="-"
+               template="inpost/checkout/onepage/shipping_method/inpost.phtml"/>
+        <reference name="choose-shipping-method">
+            <action method="setTemplate">
+                <template>inpost/onestepcheckout/shipping_method.phtml</template>
+            </action>
+            <block type="inpost_lockers/checkout_selected" name="selected.locker" as="selected_locker"
+                   template="inpost/checkout/onepage/shipping_method/lockers/selected.phtml">
+                <block type="inpost_lockers/checkout_selected" name="selected"
+                       template="inpost/checkout/onepage/shipping_method/lockers/selected/locker.phtml"/>
+            </block>
+        </reference>
+    </onestepcheckout_index_index>
+
+    <onestepcheckout_ajax_save_billing>
+        <update handle="onestepcheckout_change_shipping_methods"/>
+    </onestepcheckout_ajax_save_billing>
+    <onestepcheckout_ajax_paymentrefresh>
+        <update handle="onestepcheckout_change_shipping_methods"/>
+    </onestepcheckout_ajax_paymentrefresh>
+    <onestepcheckout_ajax_set_methods_separate>
+        <update handle="onestepcheckout_change_shipping_methods"/>
+    </onestepcheckout_ajax_set_methods_separate>
+
+    <onestepcheckout_change_shipping_methods>
+        <reference name="choose-shipping-method">
+            <action method="setTemplate">
+                <template>inpost/onestepcheckout/shipping_method.phtml</template>
+            </action>
+            <block type="inpost_lockers/checkout_selected" name="selected.locker" as="selected_locker"
+                   template="inpost/checkout/onepage/shipping_method/lockers/selected.phtml">
+                <block type="inpost_lockers/checkout_selected" name="selected"
+                       template="inpost/checkout/onepage/shipping_method/lockers/selected/locker.phtml"/>
+            </block>
+        </reference>
+    </onestepcheckout_change_shipping_methods>
+
+    <onestepcheckout_shipping_method>
+        <block type="checkout/onepage_shipping_method_available" name="choose-shipping-method"
+               template="onestepcheckout/shipping_method.phtml">
+            <action method="setTemplate">
+                <template>inpost/onestepcheckout/shipping_method.phtml</template>
+            </action>
+            <block type="inpost_lockers/checkout_selected" name="selected.locker" as="selected_locker"
+                   template="inpost/checkout/onepage/shipping_method/lockers/selected.phtml">
+                <block type="inpost_lockers/checkout_selected" name="selected"
+                       template="inpost/checkout/onepage/shipping_method/lockers/selected/locker.phtml"/>
+            </block>
+        </block>
+    </onestepcheckout_shipping_method>
+</layout>
+

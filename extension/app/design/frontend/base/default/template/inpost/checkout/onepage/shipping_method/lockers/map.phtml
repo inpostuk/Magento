@@ -1,0 +1,126 @@
+<?php
+/**
+ * (c) InPost UK Ltd <support@inpost.co.uk>
+ * This source file is subject to the license that is bundled
+ * with this source code in the file LICENSE.
+ *
+ * Built by NMedia Systems Ltd, <info@nmediasystems.com>
+ */
+?>
+<div id="map"></div>
+<script>
+    function initMap(locations, lat, lng, center, zoom) {
+
+        if (!locations) {
+            locations = <?php echo $this->getLocations(); ?>;
+        }
+
+        if (!zoom) {
+            zoom = 13;
+        }
+
+        if (locations.length > 0) {
+            if (!lat || !lng) {
+                lat = <?php echo $this->getCoordinate('lat') ?>;
+                lng = <?php echo $this->getCoordinate('lng') ?>;
+            }
+
+            if (locations) {
+                zoom = Math.round(14-Math.log(locations[locations.length - 1].distance)/Math.LN2);
+            }
+
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: zoom,
+                center: {
+                    lat: lat,
+                    lng: lng
+                }
+            });
+
+            // Add some markers to the map.
+            // Note: The code uses the JavaScript Array.prototype.map() method to
+            // create an array of markers based on a given "locations" array.
+            // The map() method here has nothing to do with the Google Maps API.
+            var icon = {
+                url: '<?php echo $this->getSkinUrl('images/inpost/marker.png') ?>', // url
+                scaledSize: new google.maps.Size(22, 40), // scaled size
+                origin: new google.maps.Point(0, -7), // origin
+                anchor: new google.maps.Point(0, 0) // anchor
+            };
+
+            var markers = locations.map(function (location, i) {
+                var marker = new google.maps.Marker({
+                    position: location,
+                    label: (i + 1).toString(),
+                    icon: icon
+                });
+
+
+                var contentString = "<div class='info-window'>" +
+                    "<div class='title'>" +
+                    "<h5 class='info-window-name'>" + (i + 1) + ' - ' + location.name + "</h5>" +
+                    "<p class='right'>" + precisionRound(location.distance, 2) + " miles</p>" +
+                    "</div>" +
+                    "<div class='info-window-address'>" + location.address + "</div>" +
+                    "<button onclick='selectPoint(event)' row-id="+location.id+" class='button'>Select</button>" +
+                    "</div>";
+
+                var infoWindow = new google.maps.InfoWindow({
+                    content: contentString,
+                    maxWidth: 250
+                });
+
+                marker.addListener('click', function () {
+                    if (window.infowindow) {
+                        window.infowindow.close();
+                    }
+                    infoWindow.open(map, marker);
+                    map.setCenter(marker.getPosition());
+                    var points = jQuery('.points .point');
+                    points.removeClass('active');
+                    points.eq(i).addClass('active');
+                    window.infowindow = infoWindow;
+                });
+
+                jQuery('.point').on('click', function () {
+                    if (!jQuery(this).hasClass('show-more-mobile')) {
+                        jQuery('.point').removeClass('active');
+                        map.setCenter(markers[parseInt(jQuery(this).attr('data-id')) -1].getPosition());
+                        map.setZoom(17);
+                        jQuery(this).addClass('active');
+                    }
+                });
+
+                return marker;
+            });
+
+            if (!center) {
+                center = {
+                    lat: lat,
+                    lng: lng
+                };
+            }
+
+            var icon = {
+                url: '<?php echo $this->getSkinUrl('images/inpost/center.png') ?>', // url
+            };
+
+            var marker = new google.maps.Marker({
+                position: center,
+                icon: icon
+            });
+
+            markers.push(marker);
+
+            function precisionRound(number, precision) {
+                var factor = Math.pow(10, precision);
+                return Math.round(number * factor) / factor;
+            }
+
+            // Add a marker clusterer to manage the markers.
+            var markerCluster = new MarkerClusterer(map, markers,
+                {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+        }
+    }
+    initMap();
+</script>

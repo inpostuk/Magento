@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+
+<!--
+/**
+ * (c) InPost UK Ltd <support@inpost.co.uk>
+ * This source file is subject to the license that is bundled
+ * with this source code in the file LICENSE.
+ *
+ * Built by NMedia Systems Ltd, <info@nmediasystems.com>
+ */
+-->
+
+<layout>
+    <adminhtml_sales_order_view>
+        <reference name="order_tab_info">
+            <action method="setTemplate">
+                <template>inpost/sales/order/view/tab/info.phtml</template>
+            </action>
+        </reference>
+    </adminhtml_sales_order_view>
+
+    <adminhtml_sales_order_shipment_new>
+        <reference name="head">
+            <action method="addItem"><type>skin_css</type><name>inpost/lockers.css</name></action>
+        </reference>
+        <reference name="order_items">
+            <action method="setTemplate">
+                <template>inpost/sales/order/shipment/create/items.phtml</template>
+            </action>
+            <block type="inpost_lockers/adminhtml_shipping_package" name="shipping.package" as="shipping_package"
+                   template="inpost/sales/order/shipment/create/form/package.phtml"/>
+        </reference>
+    </adminhtml_sales_order_shipment_new>
+
+    <adminhtml_sales_order_shipment_view>
+        <reference name="form">
+            <action method="setTemplate">
+                <template>inpost/sales/order/shipment/view/form.phtml</template>
+            </action>
+        </reference>
+    </adminhtml_sales_order_shipment_view>
+
+    <adminhtml_sales_order_shipment_view>
+        <reference name="shipment_tracking">
+            <action method="setTemplate">
+                <template>inpost/sales/order/shipment/view/tracking.phtml</template>
+            </action>
+        </reference>
+    </adminhtml_sales_order_shipment_view>
+</layout>
