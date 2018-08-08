@@ -1,7 +1,7 @@
 <?php
 
 /**
- * (c) InPost UK Ltd <support@inpost.co.uk>
+ * (c) InPost UK Ltd <it_support@inpost.co.uk>
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
  *
@@ -192,6 +192,7 @@ class Inpost_Api_Client
         $this->apiClient->setUri($this->apiEndPoint . $path);
         $this->apiClient->setMethod(Zend_Http_Client::GET);
         $this->apiClient->setHeaders("Authorization", "Bearer {$this->token}");
+        $this->apiClient->setParameterGet($params);
         $helper = Mage::helper('inpost_lockers');
         if ($helper->isDebug()) {
             $request = array();

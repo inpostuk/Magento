@@ -1,7 +1,7 @@
 <?php
 
 /**
- * (c) InPost UK Ltd <support@inpost.co.uk>
+ * (c) InPost UK Ltd <it_support@inpost.co.uk>
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
  *
@@ -62,15 +62,13 @@ class Inpost_Lockers_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::getStoreConfig('carriers/inpost_lockers/labels');
     }
 
-    public function getLabelsPath() {
+    public function getLabelsPath()
+    {
         $mediaPath = Mage::getBaseDir('media');
         $path = $mediaPath . DS . 'inpost' . DS . 'shipping-labels';
-        if (!file_exists($mediaPath . DS . 'inpost')) {
-            mkdir($mediaPath . DS . 'inpost');
-        }
-        if (!file_exists($mediaPath . DS . 'inpost' . DS . 'shipping-labels')) {
-            mkdir($mediaPath . DS . 'inpost' . DS . 'shipping-labels');
-        }
+        $io = new Varien_Io_File();
+        $io->checkAndCreateFolder($mediaPath . DS . 'inpost');
+        $io->checkAndCreateFolder($mediaPath . DS . 'inpost' . DS . 'shipping-labels');
         return $path;
     }
 
@@ -84,10 +82,12 @@ class Inpost_Lockers_Helper_Data extends Mage_Core_Helper_Abstract
         if ($radius = Mage::getStoreConfig('carriers/inpost_lockers/map_radius')) {
             return $radius;
         }
+
         return 10;
     }
 
-    public function getCreateLabelsInMagentoFlag() {
+    public function getCreateLabelsInMagentoFlag()
+    {
         return (bool)Mage::getStoreConfigFlag('carriers/inpost_lockers/parcel_create');
     }
 

@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Inpost_Lockers>
-            <version>0.1.4</version>
+            <version>1.4.0</version>
         </Inpost_Lockers>
     </modules>
     <global>
@@ -140,6 +140,15 @@
                     </inpost_lockers>
                 </observers>
             </controller_action_predispatch_checkout_onepage_index>
+            <checkout_controller_onepage_save_shipping_method>
+                <observers>
+                    <inpost_lockers>
+                        <class>inpost_lockers/observer</class>
+                        <type>singleton</type>
+                        <method>checkoutControllerOnepageSaveShippingMethod</method>
+                    </inpost_lockers>
+                </observers>
+            </checkout_controller_onepage_save_shipping_method>
             <sales_order_place_after>
                 <observers>
                     <inpost_lockers_order_after>

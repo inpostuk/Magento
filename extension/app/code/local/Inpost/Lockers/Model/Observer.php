@@ -1,7 +1,7 @@
 <?php
 
 /**
- * (c) InPost UK Ltd <support@inpost.co.uk>
+ * (c) InPost UK Ltd <it_support@inpost.co.uk>
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
  *
@@ -10,14 +10,14 @@
 
 class Inpost_Lockers_Model_Observer
 {
-    public function controllerActionPredispatchCheckoutOnepage($observer)
+    public function controllerActionPredispatchCheckoutOnepage()
     {
         $quote = Mage::getSingleton('checkout/session')->getQuote();
         if ($quote->getLockerId()) {
             $quote->setLockerId('');
             $quote->save();
         }
-        return;
+
     }
 
     public function salesOrderShipmentSaveBefore($observer)
@@ -25,37 +25,76 @@ class Inpost_Lockers_Model_Observer
         $shipment = $observer->getShipment();
         $helper = Mage::helper('inpost_lockers');
         $order = $shipment->getOrder();
-        if (strpos($order->getShippingMethod(), 'inpost_lockers') !== false && $helper->getCreateLabelsInMagentoFlag()) {
+        if (strpos($order->getShippingMethod(), 'inpost_lockers') !== false &&
+            $helper->getCreateLabelsInMagentoFlag()) {
             $request = Mage::app()->getRequest();
             $weight = $request->getParam('weight');
             $size = $request->getParam('size');
-            if(!$size) {
+            if (!$size) {
                 $size = Mage::getStoreConfig('carriers/inpost_lockers/default_size');
             }
+
             if ($size && $order->getId() && $order->getLockerId()) {
                 try {
-                    $client = new Inpost_Api_Client($helper->getToken(), $helper->getEndpoint(), $helper->getMerchantEmail());
+                    $client = new Inpost_Api_Client(
+                        $helper->getToken(),
+                        $helper->getEndpoint(),
+                        $helper->getMerchantEmail()
+                    );
                     $machineId = Mage::helper('inpost_lockers/machine')->getApiMachineIdById($order->getLockerId());
                     $shippingAddress = $order->getShippingAddress();
+                    $weight = $this->calculateWeight($weight);
                     /** @var Inpost_Models_Parcel $parcel */
-                    $parcel = $client->createParcel($shippingAddress->getTelephone(), $machineId, $size, $weight, $shippingAddress->getEmail());
+                    $parcel = $client->createParcel(
+                        $shippingAddress->getTelephone(),
+                        $machineId,
+                        $size,
+                        $weight,
+                        $shippingAddress->getEmail()
+                    );
                     $parcelData = json_encode($parcel->getData());
                     $order->setData('parcel_data', $parcelData);
                     $shipment->setParcelData($parcelData);
                     if ($parcel->getId()) {
                         $helper = Mage::helper('inpost_lockers');
                         $client->pay($parcel->getId());
-                        $client->getLabel($parcel->getId(), $helper->getLabelsPath(), $order->getIncrementId(), $helper->getLabelsFormat());
+                        $client->getLabel(
+                            $parcel->getId(),
+                            $helper->getLabelsPath(),
+                            $order->getIncrementId(),
+                            $helper->getLabelsFormat()
+                        );
                         $order->save();
                     }
                 } catch (Exception $e) {
                     Mage::log($e->getMessage(), 3, 'inpost.log');
                     Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                    Throw new Exception($e->getMessage());
+                    Mage::throwException($e->getMessage());
                 }
             }
         }
-        return;
+    }
+
+    protected function calculateWeight($weight)
+    {
+        $metric = Mage::getStoreConfig('carriers/inpost_lockers/weight');
+        $finalWeight = 0;
+        switch ($metric) {
+            case 'g':
+                $finalWeight = $weight;
+                break;
+            case 'kg':
+                $finalWeight = $weight * 1000;
+                break;
+            case 'lb':
+                $finalWeight = $weight * 453.592;
+                break;
+            default:
+                $finalWeight = $weight;
+                break;
+        }
+
+        return $finalWeight;
     }
 
     public function salesOrderShipmentSaveAfter($observer)
@@ -76,10 +115,10 @@ class Inpost_Lockers_Model_Observer
                 $order->save();
             }
         }
-        return;
     }
 
-    public function salesOrderPlaceAfter($observer) {
+    public function salesOrderPlaceAfter($observer)
+    {
         $order = $observer->getOrder();
         if (strpos($order->getShippingMethod(), 'inpost_lockers') !== false) {
             $locker = Mage::getModel('inpost_lockers/machine')->load($order->getLockerId());
@@ -88,7 +127,8 @@ class Inpost_Lockers_Model_Observer
                 $address = $order->getShippingAddress();
                 $address->setCity($locker->getCity());
                 $address->setPostcode($locker->getPostCode());
-                $address->setStreet(array(
+                $address->setStreet(
+                    array(
                         $locker->getStreet(),
                         $locker->getFlatNo() . " ($lockerId)"
                     )
@@ -99,20 +139,32 @@ class Inpost_Lockers_Model_Observer
                 if ($phone = Mage::app()->getRequest()->getParam('locker-phone')) {
                     $address->setTelephone($phone);
                 }
+
                 $address->save();
             }
         }
-        return;
     }
 
-    public function salesOrderPlaceBefore($observer) {
+    public function salesOrderPlaceBefore($observer)
+    {
         $order = $observer->getOrder();
         if (strpos($order->getShippingMethod(), 'inpost_lockers') === false) {
             $address = $order->getShippingAddress();
-            if (strpos(strtolower($address->getCompany()), 'inpost') !== false || strpos(strtolower($address->getStreet(1)), 'inpost') !== false) {
-                Mage::throwException('InPost locker is selected as shipping address with different carrier. Please amend shipping address or select InPost shipping method.');
-                return;
+            if (strpos(strtolower($address->getCompany()), 'inpost') !== false ||
+                strpos(strtolower($address->getStreet(1)), 'inpost') !== false) {
+                Mage::throwException(
+                    'InPost locker is selected as shipping address with different carrier. 
+                    Please amend shipping address or select InPost shipping method.'
+                );
             }
+        }
+    }
+
+    public function checkoutControllerOnepageSaveShippingMethod($observer)
+    {
+        $params = $observer->getRequest()->getParams();
+        if ($params['shipping_method'] == 'inpost_lockers_' && array_key_exists('locker-phone', $params)) {
+            $observer->getQuote()->getShippingAddress()->setTelephone($params['locker-phone']);
         }
     }
 }

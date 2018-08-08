@@ -1,19 +1,22 @@
 <?php
 
 /**
- * (c) InPost UK Ltd <support@inpost.co.uk>
+ * (c) InPost UK Ltd <it_support@inpost.co.uk>
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
  *
  * Built by NMedia Systems Ltd, <info@nmediasystems.com>
  */
 
-class Inpost_Lockers_Helper_Locations extends Mage_Core_Helper_Abstract {
+class Inpost_Lockers_Helper_Locations extends Mage_Core_Helper_Abstract
+{
 
-    public function getLocations($lat, $lng, $limit = 5) {
+    public function getLocations($lat, $lng, $limit = 5)
+    {
         if (!$limit) {
             $limit = 5;
         }
+
         $collection = Mage::getResourceModel('inpost_lockers/machine')->getNearestLocations(
             $lat,
             $lng,
@@ -26,12 +29,14 @@ class Inpost_Lockers_Helper_Locations extends Mage_Core_Helper_Abstract {
                 $object->id = $item->getId();
                 $object->lat = floatval($lat);
                 $object->lng = floatval($lon);
-                $object->name = preg_replace("|inpost locker-|i",  '', $item->getBuildingNo());
-                $object->address = '<p>' . $item->getStreet() . '</p>' . '<p>' . $item->getCity() . ', ' . $item->getPostCode() . '</p>';
+                $object->name = preg_replace("|inpost locker-|i", '', $item->getBuildingNo());
+                $object->address = '<p>' . $item->getStreet() . '</p>' . '<p>' .
+                    $item->getCity() . ', ' . $item->getPostCode() . '</p>';
                 $object->distance = $item->getDistance();
                 $locations[] = $object;
             }
         }
+
         return $locations;
     }
 }

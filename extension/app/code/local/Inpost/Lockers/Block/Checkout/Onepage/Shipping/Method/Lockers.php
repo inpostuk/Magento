@@ -1,7 +1,7 @@
 <?php
 
 /**
- * (c) InPost UK Ltd <support@inpost.co.uk>
+ * (c) InPost UK Ltd <it_support@inpost.co.uk>
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
  *
@@ -11,9 +11,9 @@
 class Inpost_Lockers_Block_Checkout_Onepage_Shipping_Method_Lockers extends Mage_Core_Block_Template
 {
 
-    protected $collection = false;
-    protected $coordinates = array();
-    protected $daysOfWeek = array(
+    protected $_collection = false;
+    protected $_coordinates = array();
+    protected $_daysOfWeek = array(
         'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
     );
 
@@ -28,6 +28,7 @@ class Inpost_Lockers_Block_Checkout_Onepage_Shipping_Method_Lockers extends Mage
         if ($postcode = $quote->getBillingAddress()->getPostcode()) {
             return $postcode;
         }
+
         return '';
     }
 
@@ -42,11 +43,15 @@ class Inpost_Lockers_Block_Checkout_Onepage_Shipping_Method_Lockers extends Mage
 
         if ($coordinates) {
             $coordinates = (array)json_decode($coordinates);
-            $this->coordinates = $coordinates;
-            $this->collection = Mage::getResourceModel('inpost_lockers/machine')->getNearestLocations($coordinates['lat'], $coordinates['lng'], $limit);
+            $this->_coordinates = $coordinates;
+            $this->_collection = Mage::getResourceModel('inpost_lockers/machine')->getNearestLocations(
+                $coordinates['lat'],
+                $coordinates['lng'],
+                $limit
+            );
 
-            $this->registerCollection('machine_collection', $this->collection);
-            return $this->collection;
+            $this->registerCollection('machine_collection', $this->_collection);
+            return $this->_collection;
         }
     }
 
@@ -55,6 +60,7 @@ class Inpost_Lockers_Block_Checkout_Onepage_Shipping_Method_Lockers extends Mage
         if (Mage::registry($key)) {
             Mage::unregister($key);
         }
+
         Mage::register($key, $collection);
     }
 
@@ -62,7 +68,6 @@ class Inpost_Lockers_Block_Checkout_Onepage_Shipping_Method_Lockers extends Mage
     public function getOperatingHours($item)
     {
         $html = '<table class="op-hours">';
-        $hours = $item->getOperatingHours();
         $html .= '<tr><td>Accessible 24/7</td></td></tr>';
         $html .= '<tr><td>' . $item->getLocationDescription() . '</td></tr>';
         $html .= '</table>';
@@ -75,19 +80,28 @@ class Inpost_Lockers_Block_Checkout_Onepage_Shipping_Method_Lockers extends Mage
         if (array_key_exists($key, $coordinates)) {
             return $coordinates[$key];
         }
+
         return '';
     }
 
     public function getLocations()
     {
         $limit = $this->getRequest()->getParam('limit');
-        $locations = Mage::helper('inpost_lockers/locations')->getLocations($this->getCoordinate('lat'), $this->getCoordinate('lng'), $limit);
+        $locations = Mage::helper('inpost_lockers/locations')->getLocations(
+            $this->getCoordinate('lat'),
+            $this->getCoordinate('lng'),
+            $limit
+        );
         return json_encode($locations);
     }
 
     public function getStoresFound()
     {
-        $collection = Mage::helper('inpost_lockers/locations')->getLocations($this->getCoordinate('lat'), $this->getCoordinate('lng'), 20000);
+        $collection = Mage::helper('inpost_lockers/locations')->getLocations(
+            $this->getCoordinate('lat'),
+            $this->getCoordinate('lng'),
+            20000
+        );
         return count($collection);
     }
 
@@ -97,10 +111,12 @@ class Inpost_Lockers_Block_Checkout_Onepage_Shipping_Method_Lockers extends Mage
         if ($postcode) {
             return $postcode;
         }
+
         $quote = Mage::getSingleton('checkout/session')->getQuote();
         if ($quote->getId()) {
             return $quote->getBillingAddress()->getPostcode();
         }
+
         return '';
     }
 
@@ -123,6 +139,7 @@ class Inpost_Lockers_Block_Checkout_Onepage_Shipping_Method_Lockers extends Mage
         if (!$param = $this->getRequest()->getParam('type')) {
             return 'desktop';
         }
+
         return $param;
     }
 }

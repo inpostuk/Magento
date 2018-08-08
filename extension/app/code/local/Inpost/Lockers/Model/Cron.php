@@ -1,7 +1,7 @@
 <?php
 
 /**
- * (c) InPost UK Ltd <support@inpost.co.uk>
+ * (c) InPost UK Ltd <it_support@inpost.co.uk>
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
  *
@@ -10,14 +10,14 @@
 
 class Inpost_Lockers_Model_Cron
 {
-    protected $finalStatuses = array(
+    protected $_finalStatuses = array(
         'delivered',
         'deliveredtoagency',
         'cancelled',
         'claimed'
     );
 
-    protected $mapping = array(
+    protected $_mapping = array(
         'delivered' => array(
             'state' => 'complete',
             'status' => 'inpost_delivered'
@@ -86,35 +86,34 @@ class Inpost_Lockers_Model_Cron
         $client = new Inpost_Api_Client($helper->getToken());
         $machines = $client->getMachinesList();
         foreach ($machines as $machine) {
-            if ($machine->getData('status') == 'Operating') {
-                if ($machine->getData('id')) {
-                    $flag = false;
-                    $model = Mage::getResourceModel('inpost_lockers/machine_collection')
-                        ->addFieldToSelect('*')
-                        ->addFieldToFilter('id', $machine['id'])
-                        ->getFirstItem();
-                    if ($model->getId()) {
-                        foreach ($machine->getData() as $key => $value) {
-                            if ($model->getData('key') !== $value) {
-                                $model->setData($key, $value);
-                                $flag = true;
-                            }
+            if ($machine->getData('status') == 'Operating' && $machine->getData('id')) {
+                $model = Mage::getResourceModel('inpost_lockers/machine_collection')
+                    ->addFieldToSelect('*')
+                    ->addFieldToFilter('id', $machine['id'])
+                    ->setPageSize(1)
+                    ->setCurPage(1)
+                    ->getLastItem();
+                $attributesForUpdate = array();
+                if ($model->getId()) {
+                    foreach ($machine->getData() as $key => $value) {
+                        if ($model->getData($key) !== $value) {
+                            $attributesForUpdate[$key] = $value;
                         }
-                    } else {
-                        $model->addData($machine->getData());
-                        $flag = true;
                     }
-                    if ($flag) {
-                        $model->save();
-                    }
+                } else {
+                    $attributesForUpdate = $machine->getData();
                 }
+
+                $model->updateAttributes($attributesForUpdate);
             } else {
                 $model = Mage::getResourceModel('inpost_lockers/machine_collection')
                     ->addFieldToSelect('*')
                     ->addFieldToFilter('id', $machine['id'])
-                    ->getFirstItem();
+                    ->setPageSize(1)
+                    ->setCurPage(1)
+                    ->getLastItem();
                 if ($model->getId()) {
-                    $model->delete();
+                    $model->getResource()->removeMachineById($model->getId());
                 }
             }
         }
@@ -122,19 +121,38 @@ class Inpost_Lockers_Model_Cron
 
     public function updateInpostOrderStatuses()
     {
-        $now = Mage::getModel('core/date')->timestamp(time());
-
-        $fromDate = date('Y-m-d' . ' 00:00:00', strtotime('-7 day'));
-        $toDate = date('Y-m-d' . ' 23:59:59', $now);
+        $coreDate = Mage::getSingleton('core/date');
+        $fromDate = $coreDate->gmtDate('Y-m-d 00:00:00', '-7 day');
+        $toDate = $coreDate->gmtDate('Y-m-d 23:59:59', 'now');
         $collection = Mage::getResourceModel('sales/order_collection')
-            ->addFieldToFilter('status', array('in' => array('inpost_shipped', 'inpost_delivered', 'inpost_stored', 'inpost_expired', 'inpost_returnedtoagency', 'inpost_labelexpired',
-                'inpost_notdelivered', 'inpost_missing')))
-            ->addFieldToFilter('created_at', array(
-                'from' => $fromDate,
-                'to' => $toDate,
-                'date' => true,
-            ))
-            ->addFieldToFilter('shipping_method', array('like' => '%inpost_lockers%'));
+            ->addFieldToFilter(
+                'status',
+                array(
+                    'in' => array(
+                        'inpost_shipped',
+                        'inpost_delivered',
+                        'inpost_stored',
+                        'inpost_expired',
+                        'inpost_returnedtoagency',
+                        'inpost_labelexpired',
+                        'inpost_notdelivered',
+                        'inpost_missing')
+                )
+            )
+            ->addFieldToFilter(
+                'created_at',
+                array(
+                    'from' => $fromDate,
+                    'to' => $toDate,
+                    'date' => true,
+                )
+            )
+            ->addFieldToFilter(
+                'shipping_method',
+                array(
+                    'like' => '%inpost_lockers%'
+                )
+            );
         $helper = Mage::helper('inpost_lockers');
         $client = new Inpost_Api_Client($helper->getToken(), $helper->getEndpoint());
         $lastNotFinal = false;
@@ -142,7 +160,8 @@ class Inpost_Lockers_Model_Cron
             'avizo' => array(
                 'counter' => 0,
                 'search' => 'parcels that haven’t been picked up by customers',
-                'message' => 'InPost: %s parcels that haven’t been picked up by customers from lockers yet (InPost Stored24)'
+                'message' =>
+                    'InPost: %s parcels that haven’t been picked up by customers from lockers yet (InPost Stored24)'
             ),
             'expired' => array(
                 'counter' => 0,
@@ -174,33 +193,48 @@ class Inpost_Lockers_Model_Cron
                         if (array_key_exists($parcelDataFromApi['status'], $counter)) {
                             $counter[$parcelDataFromApi['status']]['counter']++;
                         }
-                        if (!array_key_exists($parcelDataFromApi['status'], $this->finalStatuses)) {
+
+                        if (!array_key_exists($parcelDataFromApi['status'], $this->_finalStatuses)) {
                             $lastNotFinal = $parcelDataFromApi;
                         }
-                        $json = json_encode($parcelDataFromApi);
-                        if ($shipment->getParcelData() !== $json) {
-                            $shipment->setParcelData($json)->save();
-                        }
+
+                        $shipment->setParcelData($parcelDataFromApi);
+                        $shipment->getResource()->saveAttribute($shipment, 'parcel_data');
                     }
                 }
             }
+
             if (!$lastNotFinal) {
                 $lastNotFinal = $parcelDataFromApi;
             }
-            $data = $this->mapping[$lastNotFinal['status']];
-            $order->setStatus($data['status']);
-            $order->addStatusHistoryComment('', $data['status']);
-            $order->save();
+
+            $data = $this->_mapping[$lastNotFinal['status']];
+            $this->setOrderStatusAndComment($order, $data);
+
             foreach ($counter as $key => $value) {
                 if ($value['counter'] > 0) {
-                    $notification = Mage::getResourceModel('adminnotification/inbox_collection')
-                        ->addFieldToFilter('title', array('like' => "%{$value['search']}%"))
-                        ->getFirstItem();
-                    $notification->setTitle(sprintf($value['message'], $value['counter']));
-                    $notification->setSeverity(4);
-                    $notification->save();
+                    $this->createNotification($value);
                 }
             }
         }
+    }
+
+    public function setOrderStatusAndComment($order, $data)
+    {
+        $order->setStatus($data['status']);
+        $order->addStatusHistoryComment('', $data['status']);
+        $order->save();
+    }
+
+    protected function createNotification($value)
+    {
+        $notification = Mage::getResourceModel('adminnotification/inbox_collection')
+            ->addFieldToFilter('title', array('like' => "%{$value['search']}%"))
+            ->setPageSize(1)
+            ->setCurPage(1)
+            ->getLastItem();
+        $notification->setTitle(sprintf($value['message'], $value['counter']));
+        $notification->setSeverity(4);
+        $notification->save();
     }
 }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * (c) InPost UK Ltd <support@inpost.co.uk>
+ * (c) InPost UK Ltd <it_support@inpost.co.uk>
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
  *
@@ -22,14 +22,16 @@ class Inpost_Lockers_Block_Checkout_Js extends Mage_Core_Block_Template
         return htmlspecialchars(json_encode($return));
     }
 
-    public function getLocationsCount() {
+    public function getLocationsCount()
+    {
         $model = Mage::getResourceModel('inpost_lockers/machine');
         $count = ceil($model->getLocationsCount() / 100) * 100;
         
         return number_format($count);
     }
 
-    public function getShippingPrice() {
+    public function getShippingPrice()
+    {
         return Mage::getStoreConfig('carriers/inpost_lockers/price');
     }
 }

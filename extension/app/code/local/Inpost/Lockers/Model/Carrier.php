@@ -1,7 +1,7 @@
 <?php
 
 /**
- * (c) InPost UK Ltd <support@inpost.co.uk>
+ * (c) InPost UK Ltd <it_support@inpost.co.uk>
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
  *
@@ -18,7 +18,8 @@ class Inpost_Lockers_Model_Carrier
     public function getAllowedMethods()
     {
         return array(
-            'standard' => 'InPost 24/7 locker collection (next day) <img src="/skin/frontend/base/default/images/inpost/inpost.png"/>',
+            'standard' => 'InPost 24/7 locker collection (next day) 
+            <img src="/skin/frontend/base/default/images/inpost/inpost.png"/>',
         );
     }
 
@@ -35,6 +36,7 @@ class Inpost_Lockers_Model_Carrier
         if ($expressAvailable) {
             $result->append($this->_getExpressRate());
         }
+
         $result->append($this->_getStandardRate($request));
 
         return $result;
@@ -67,7 +69,8 @@ class Inpost_Lockers_Model_Carrier
         return true;
     }
 
-    public function isTrackingAvailable() {
+    public function isTrackingAvailable()
+    {
         return true;
     }
 }

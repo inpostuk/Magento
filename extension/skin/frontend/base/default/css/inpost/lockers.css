@@ -1,5 +1,5 @@
 /**
- * (c) InPost UK Ltd <support@inpost.co.uk>
+ * (c) InPost UK Ltd <it_support@inpost.co.uk>
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
  * 
@@ -32,7 +32,6 @@ html, body {
 .lockers {
     position: fixed;
     top: 0;
-    /* overflow: hidden; */
     width: 100%;
     height: 100vh;
     font-family: 'Open Sans', sans-serif;

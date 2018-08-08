@@ -1,7 +1,7 @@
 <?php
 
 /**
- * (c) InPost UK Ltd <support@inpost.co.uk>
+ * (c) InPost UK Ltd <it_support@inpost.co.uk>
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
  *
@@ -15,7 +15,10 @@ class Inpost_Lockers_LockersController extends Mage_Core_Controller_Front_Action
     {
         $params = $this->getRequest()->getParams();
         if (array_key_exists('lat', $params) && array_key_exists('lng', $params)) {
-            $locations = Mage::getResourceModel('inpost_lockers/machine')->getNearestLocations($params['lat'], $params['lng']);
+            $locations = Mage::getResourceModel('inpost_lockers/machine')->getNearestLocations(
+                $params['lat'],
+                $params['lng']
+            );
         }
     }
 
@@ -26,8 +29,6 @@ class Inpost_Lockers_LockersController extends Mage_Core_Controller_Front_Action
             $quote = Mage::getModel('sales/quote')->load($quoteId);
             if ($quote->getId()) {
                 $helper = Mage::helper('inpost_lockers');
-                $defaultCountry = Mage::getStoreConfig('general/country/default');
-
                 // in case billing address hasn't been provided at this point, we'll show map for Camden by default
                 // prompting users to enter their post code in the address field
                 if ($quote->getBillingAddress()->getPostcode()) {
@@ -36,14 +37,22 @@ class Inpost_Lockers_LockersController extends Mage_Core_Controller_Front_Action
                     if (!$billingPostcode = $this->getRequest()->getParam('postcode')) {
                         $billingPostcode = 'NW1 8AH';
                     }
+
                     $quote->getBillingAddress()->setPostcode($billingPostcode);
                 }
 
-                $url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $billingPostcode . ",GB&key=" . $helper->getGoogleMapsKey();
+                $url = sprintf(
+                    "https://maps.googleapis.com/maps/api/geocode/xml?address=%s,GB&key=%s",
+                    $billingPostcode,
+                    $helper->getGoogleMapsKey()
+                );
                 $result = simplexml_load_file($url);
                 if ($result->status == 'OK') {
                     Mage::register('current_quote', $quote);
-                    $coordinates = array('lat' => $result->result->geometry->location->lat->__toString(), 'lng' => $result->result->geometry->location->lng->__toString());
+                    $coordinates = array('lat' =>
+                        $result->result->geometry->location->lat->__toString(),
+                        'lng' => $result->result->geometry->location->lng->__toString()
+                    );
                     Mage::register('coordinates', json_encode($coordinates));
                     $response['html'] = $this->getLayoutHtml();
                     $response['center'] = json_encode($coordinates);
@@ -54,7 +63,6 @@ class Inpost_Lockers_LockersController extends Mage_Core_Controller_Front_Action
                 }
             }
         }
-        return;
     }
 
     protected function getLayoutHtml()
@@ -72,18 +80,18 @@ class Inpost_Lockers_LockersController extends Mage_Core_Controller_Front_Action
     {
         $response = array();
         $postcode = $this->getRequest()->getParam('postcode');
-
         $limit = $this->getRequest()->getParam('limit');
-
         if (!$postcode) {
             $response['error'] = 'Please enter valid postcode.';
         }
 
         $helper = Mage::helper('inpost_lockers');
-        $defaultCountry = Mage::getStoreConfig('general/country/default');
-        $url = "https://maps.googleapis.com/maps/api/geocode/xml?address=" . $postcode . ",GB&key=" . $helper->getGoogleMapsKey();
+        $url = sprintf(
+            "https://maps.googleapis.com/maps/api/geocode/xml?address=%s,GB&key=%s",
+            $postcode,
+            $helper->getGoogleMapsKey()
+        );
         $result = simplexml_load_file($url);
-
         if ($result->status->__toString() !== 'OK') {
             $response['error'] = 'Can\'t find the postcode.';
         }
@@ -93,17 +101,23 @@ class Inpost_Lockers_LockersController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        $coordinates = array('lat' => $result->result->geometry->location->lat->__toString(), 'lng' => $result->result->geometry->location->lng->__toString());
+        $coordinates = array(
+            'lat' => $result->result->geometry->location->lat->__toString(),
+            'lng' => $result->result->geometry->location->lng->__toString()
+        );
         Mage::register('coordinates', json_encode($coordinates));
-
         $response['left'] = $this->getLayout()
             ->createBlock('inpost_lockers/checkout_onepage_shipping_method_lockers')
             ->setTemplate('inpost/checkout/onepage/shipping_method/lockers/left.phtml')
             ->toHtml();
-
-        $response['locations'] = json_encode(Mage::helper('inpost_lockers/locations')->getLocations($coordinates['lat'], $coordinates['lng'], $limit));
+        $response['locations'] = json_encode(
+            Mage::helper('inpost_lockers/locations')->getLocations(
+                $coordinates['lat'],
+                $coordinates['lng'],
+                $limit
+            )
+        );
         $response['center'] = json_encode($coordinates);
-
         $this->getResponse()->setBody(json_encode($response));
     }
 
@@ -128,13 +142,22 @@ class Inpost_Lockers_LockersController extends Mage_Core_Controller_Front_Action
                 $quote->save();
                 $response['success'] = true;
                 if ($this->getRequest()->getParam('onepage') == '1') {
-                    $response['address_block'] = $this->getLayout()->createBlock("checkout/onepage_progress")->setTemplate("checkout/onepage/progress/shipping.phtml")->toHtml();
+                    $response['address_block'] = $this->getLayout()
+                        ->createBlock("checkout/onepage_progress")
+                        ->setTemplate("checkout/onepage/progress/shipping.phtml")
+                        ->toHtml();
                 }
-                $response['selected_locker'] = $this->getLayout()->createBlock("inpost_lockers/checkout_selected")->setLocker($locker)->setTemplate("inpost/checkout/onepage/shipping_method/lockers/selected/locker.phtml")->toHtml();
+
+                $response['selected_locker'] = $this->getLayout()
+                    ->createBlock("inpost_lockers/checkout_selected")
+                    ->setLocker($locker)
+                    ->setTemplate("inpost/checkout/onepage/shipping_method/lockers/selected/locker.phtml")
+                    ->toHtml();
                 $this->getResponse()->setBody(json_encode($response));
                 return;
             }
         }
+
         $this->getResponse()->setBody(json_encode(array('success' => false)));
     }
 
@@ -166,10 +189,15 @@ class Inpost_Lockers_LockersController extends Mage_Core_Controller_Front_Action
             $address->setTelephone($phone);
             $changed = true;
         }
+
         if ($changed) {
             $address->save();
         }
-        $response['address_block'] = $this->getLayout()->createBlock("checkout/onepage_progress")->setTemplate("checkout/onepage/progress/shipping.phtml")->toHtml();
+
+        $response['address_block'] = $this->getLayout()
+            ->createBlock("checkout/onepage_progress")
+            ->setTemplate("checkout/onepage/progress/shipping.phtml")
+            ->toHtml();
         $this->getResponse()->setBody(json_encode($response));
     }
 

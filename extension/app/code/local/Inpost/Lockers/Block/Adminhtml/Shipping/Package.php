@@ -1,7 +1,7 @@
 <?php
 
 /**
- * (c) InPost UK Ltd <support@inpost.co.uk>
+ * (c) InPost UK Ltd <it_support@inpost.co.uk>
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
  *
@@ -9,7 +9,7 @@
  */
 class Inpost_Lockers_Block_Adminhtml_Shipping_Package extends Mage_Core_Block_Template
 {
-    protected $order = false;
+    protected $_order = false;
 
     public function isBlockAvailable()
     {
@@ -19,6 +19,7 @@ class Inpost_Lockers_Block_Adminhtml_Shipping_Package extends Mage_Core_Block_Te
         ) {
             return true;
         }
+
         return false;
     }
 
@@ -29,12 +30,13 @@ class Inpost_Lockers_Block_Adminhtml_Shipping_Package extends Mage_Core_Block_Te
 
     public function getOrder()
     {
-        if (!$this->order) {
+        if (!$this->_order) {
             if ($orderId = $this->getOrderId()) {
-                $this->order = Mage::getModel('sales/order')->load($orderId);
+                $this->_order = Mage::getModel('sales/order')->load($orderId);
             }
         }
-        return $this->order;
+
+        return $this->_order;
     }
 
     public function getTotalWeight()
@@ -44,6 +46,7 @@ class Inpost_Lockers_Block_Adminhtml_Shipping_Package extends Mage_Core_Block_Te
         foreach ($order->getAllVisibleItems() as $item) {
             $weight += ($item->getWeight() * ((int)$item->getQtyOrdered() - (int)$item->getQtyShipped()));
         }
+
         return $weight;
     }
 
@@ -54,6 +57,7 @@ class Inpost_Lockers_Block_Adminhtml_Shipping_Package extends Mage_Core_Block_Te
         foreach ($order->getAllVisibleItems() as $item) {
             $array[$item->getId()] = $item->getWeight();
         }
+
         return json_encode($array);
     }
 
