@@ -29,38 +29,48 @@ class Inpost_Lockers_LockersController extends Mage_Core_Controller_Front_Action
             $quote = Mage::getModel('sales/quote')->load($quoteId);
             if ($quote->getId()) {
                 $helper = Mage::helper('inpost_lockers');
+
                 // in case billing address hasn't been provided at this point, we'll show map for Camden by default
                 // prompting users to enter their post code in the address field
                 if ($quote->getBillingAddress()->getPostcode()) {
                     $billingPostcode = $quote->getBillingAddress()->getPostcode();
                 } else {
                     if (!$billingPostcode = $this->getRequest()->getParam('postcode')) {
-                        $billingPostcode = 'NW1 8AH';
+                        $billingPostcode = 'London';
                     }
 
                     $quote->getBillingAddress()->setPostcode($billingPostcode);
                 }
 
                 $url = sprintf(
-                    "https://maps.googleapis.com/maps/api/geocode/xml?address=%s,GB&key=%s",
+                    "https://maps.googleapis.com/maps/api/geocode/xml?address=%s,United Kingdom&key=%s",
                     $billingPostcode,
                     $helper->getGoogleMapsKey()
                 );
                 $result = simplexml_load_file($url);
                 if ($result->status == 'OK') {
-                    Mage::register('current_quote', $quote);
-                    $coordinates = array('lat' =>
-                        $result->result->geometry->location->lat->__toString(),
-                        'lng' => $result->result->geometry->location->lng->__toString()
-                    );
-                    Mage::register('coordinates', json_encode($coordinates));
-                    $response['html'] = $this->getLayoutHtml();
-                    $response['center'] = json_encode($coordinates);
-                    $this->getResponse()->setBody(json_encode($response));
-                } else {
-                    $response['error'] = 'Please enter a valid postcode';
-                    $this->getResponse()->setBody(json_encode($response));
+                    if ($result->result->formatted_address->__toString() == 'United Kingdom') {
+                        $coordinates = array(
+                            'lat' => '51.5419891',
+                            'lng' => '-0.1473598'
+                        );
+                        $response['center'] = json_encode($coordinates);
+                        $response['postcode'] = 'London';
+                    } else {
+                        $coordinates = array('lat' =>
+                            $result->result->geometry->location->lat->__toString(),
+                            'lng' => $result->result->geometry->location->lng->__toString()
+                        );
+                        $response['center'] = json_encode($coordinates);
+                        $response['postcode'] = $billingPostcode;
+                    }
+
                 }
+
+                Mage::register('current_quote', $quote);
+                Mage::register('coordinates', json_encode($coordinates));
+                $response['html'] = $this->getLayoutHtml();
+                $this->getResponse()->setBody(json_encode($response));
             }
         }
     }
@@ -87,7 +97,7 @@ class Inpost_Lockers_LockersController extends Mage_Core_Controller_Front_Action
 
         $helper = Mage::helper('inpost_lockers');
         $url = sprintf(
-            "https://maps.googleapis.com/maps/api/geocode/xml?address=%s,GB&key=%s",
+            "https://maps.googleapis.com/maps/api/geocode/xml?address=%s,United Kingdom&key=%s",
             $postcode,
             $helper->getGoogleMapsKey()
         );

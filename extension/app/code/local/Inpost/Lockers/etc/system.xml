@@ -52,29 +52,49 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </method>
-                        <token translate="label">
-                            <label>API Token</label>
-                            <frontend_type>text</frontend_type>
+                        <parcel_create translate="label">
+                            <label>Create labels in Magento</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>6</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </token>
-                        <email translate="label">
-                            <label>Merchant email</label>
+                            <show_in_store>0</show_in_store>
+                        </parcel_create>
+                        <token translate="label">
+                            <label>API Token</label>
                             <frontend_type>text</frontend_type>
                             <sort_order>7</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                        </email>
-                        <endpoint translate="label">
-                            <label>API endpoint</label>
+                            <depends><parcel_create>1</parcel_create></depends>
+                        </token>
+                        <email translate="label">
+                            <label>Merchant email</label>
                             <frontend_type>text</frontend_type>
                             <sort_order>8</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+                            <depends><parcel_create>1</parcel_create></depends>
+                        </email>
+                        <map_key translate="label">
+                            <label>Google Maps Api Key</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>9</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </map_key>
+                        <endpoint translate="label">
+                            <label>API endpoint</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><parcel_create>1</parcel_create></depends>
                         </endpoint>
                         <parcel_create translate="label">
                             <label>Create labels in Magento</label>
@@ -85,11 +105,12 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </parcel_create>
+
                         <labels translate="label">
                             <label>Labels Format</label>
                             <frontend_type>select</frontend_type>
                             <source_model>inpost_lockers/system_config_source_labels</source_model>
-                            <sort_order>10</sort_order>
+                            <sort_order>12</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -97,7 +118,7 @@
                         <sallowspecific translate="label">
                             <label>Ship to Applicable Countries</label>
                             <frontend_type>select</frontend_type>
-                            <sort_order>11</sort_order>
+                            <sort_order>13</sort_order>
                             <frontend_class>shipping-applicable-country</frontend_class>
                             <source_model>adminhtml/system_config_source_shipping_allspecificcountries</source_model>
                             <show_in_default>1</show_in_default>
@@ -107,7 +128,7 @@
                         <specificcountry translate="label">
                             <label>Ship to Specific Countries</label>
                             <frontend_type>multiselect</frontend_type>
-                            <sort_order>12</sort_order>
+                            <sort_order>14</sort_order>
                             <source_model>adminhtml/system_config_source_country</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -118,7 +139,7 @@
                             <label>Weight</label>
                             <frontend_type>select</frontend_type>
                             <source_model>inpost_lockers/system_config_source_weight</source_model>
-                            <sort_order>13</sort_order>
+                            <sort_order>15</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -127,7 +148,7 @@
                             <label>Default size class</label>
                             <frontend_type>select</frontend_type>
                             <source_model>inpost_lockers/system_config_source_size</source_model>
-                            <sort_order>14</sort_order>
+                            <sort_order>16</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
@@ -135,7 +156,7 @@
                         <sort_order translate="label">
                             <label>Sort Order</label>
                             <frontend_type>text</frontend_type>
-                            <sort_order>15</sort_order>
+                            <sort_order>17</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -144,24 +165,16 @@
                             <label>Debug Mode</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>16</sort_order>
+                            <sort_order>18</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </debug>
-                        <map_key translate="label">
-                            <label>Google Maps Api Key</label>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>17</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </map_key>
                         <map_radius translate="label">
                             <label>Default Map Radius</label>
                             <comment>in miles</comment>
                             <frontend_type>text</frontend_type>
-                            <sort_order>18</sort_order>
+                            <sort_order>19</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -169,7 +182,7 @@
                         <specificerrmsg translate="label">
                             <label>Displayed Error Message</label>
                             <frontend_type>textarea</frontend_type>
-                            <sort_order>19</sort_order>
+                            <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>

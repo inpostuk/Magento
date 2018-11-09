@@ -12,6 +12,13 @@
 
 <layout>
     <checkout_onepage_index>
+        <!--<reference name="head">
+            <block type="core/text" name="jquery.noconflict">
+                <action method="setText">
+                    <text><![CDATA[<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script type="text/javascript">jQuery.noConflict();</script>]]></text>
+                </action>
+            </block>
+        </reference>-->
         <update handle="shipping_inpost_lockers"/>
         <reference name="checkout.onepage.shipping_method.available">
             <action method="setTemplate">
@@ -21,7 +28,24 @@
     </checkout_onepage_index>
 
     <paypal_express_review>
+        <!--<reference name="head">
+            <block type="core/text" name="jquery.noconflict">
+                <action method="setText">
+                    <text><![CDATA[<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script><script type="text/javascript">jQuery.noConflict();</script>]]></text>
+                </action>
+            </block>
+        </reference>-->
         <update handle="shipping_inpost_lockers"/>
+        <reference name="express.review.shipping.method">
+            <action method="setTemplate">
+                <template>inpost/paypal/express/shipping/method.phtml</template>
+            </action>
+            <block type="inpost_lockers/checkout_selected" name="selected.locker" as="selected_locker"
+                   template="inpost/checkout/onepage/shipping_method/lockers/selected.phtml">
+                <block type="inpost_lockers/checkout_selected" name="selected"
+                       template="inpost/checkout/onepage/shipping_method/lockers/selected/locker.phtml"/>
+            </block>
+        </reference>
         <reference name="paypal.express.review">
             <action method="setTemplate">
                 <template>inpost/paypal/express/review.phtml</template>
@@ -148,4 +172,3 @@
         </block>
     </onestepcheckout_shipping_method>
 </layout>
-

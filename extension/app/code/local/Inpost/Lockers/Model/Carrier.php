@@ -25,6 +25,8 @@ class Inpost_Lockers_Model_Carrier
 
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
+        $helper = Mage::helper('inpost_lockers');
+
         /** @var Mage_Shipping_Model_Rate_Result $result */
         $result = Mage::getModel('shipping/rate_result');
 

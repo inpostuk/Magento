@@ -50,7 +50,8 @@ class Inpost_Lockers_Model_Observer
                         $machineId,
                         $size,
                         $weight,
-                        $shippingAddress->getEmail()
+                        $shippingAddress->getEmail(),
+                        $shipment->getOrder()->getIncrementId()
                     );
                     $parcelData = json_encode($parcel->getData());
                     $order->setData('parcel_data', $parcelData);
@@ -78,7 +79,6 @@ class Inpost_Lockers_Model_Observer
     protected function calculateWeight($weight)
     {
         $metric = Mage::getStoreConfig('carriers/inpost_lockers/weight');
-        $finalWeight = 0;
         switch ($metric) {
             case 'g':
                 $finalWeight = $weight;
@@ -130,7 +130,7 @@ class Inpost_Lockers_Model_Observer
                 $address->setStreet(
                     array(
                         $locker->getStreet(),
-                        $locker->getFlatNo() . " ($lockerId)"
+                        "Locker ID ($lockerId)"
                     )
                 );
                 $address->setCompany($locker->getBuildingNo());

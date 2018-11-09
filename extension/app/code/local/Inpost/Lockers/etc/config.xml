@@ -181,7 +181,7 @@
                 <sort_order>0</sort_order>
                 <sallowspecific>0</sallowspecific>
                 <express_max_weight>20000</express_max_weight>
-                <price>2.99</price>
+                <price>0.00</price>
                 <endpoint>https://api-uk.easypack24.net/v4/</endpoint>
                 <map_radius>10</map_radius>
                 <weight>kg</weight>
@@ -200,7 +200,7 @@
         <jobs>
             <inpost_lockers_machines>
                 <schedule>
-                    <cron_expr>15 3 * * *</cron_expr>
+                    <cron_expr>15 */4 * * *</cron_expr>
                 </schedule>
                 <run>
                     <model>inpost_lockers/cron::getMachinesFromApi</model>

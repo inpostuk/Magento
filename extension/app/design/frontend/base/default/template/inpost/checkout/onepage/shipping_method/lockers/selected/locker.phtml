@@ -83,7 +83,12 @@
             });
 
             Validation.add('validate-uk-phone', 'Please provide your mobile phone number in this format 077 1234 5678', function (v) {
-                return Validation.get('IsEmpty').test(v) || /^((((\+|00)?447\s?\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3})|(((\+|00)447\s?\d{2}|\(?07\d{2}\)?)\s?\d{3}\s?\d{4})|(((\+|00)447\s?\d{1}|\(?07\d{1}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$/.test(v)
+                if (jQuery('input[name=shipping_method]').length > 0 && jQuery('input[name=shipping_method]:checked').val().indexOf('inpost_lockers') >= 0) {
+                    return Validation.get('IsEmpty').test(v) || /^((((\+|00)?447\s?\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3})|(((\+|00)447\s?\d{2}|\(?07\d{2}\)?)\s?\d{3}\s?\d{4})|(((\+|00)447\s?\d{1}|\(?07\d{1}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$/.test(v)
+                } else if (jQuery('select[name=shipping_method]').length > 0 && jQuery('select[name=shipping_method]').val().indexOf('inpost_lockers') >= 0) {
+                    return Validation.get('IsEmpty').test(v) || /^((((\+|00)?447\s?\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3})|(((\+|00)447\s?\d{2}|\(?07\d{2}\)?)\s?\d{3}\s?\d{4})|(((\+|00)447\s?\d{1}|\(?07\d{1}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$/.test(v)
+                }
+                return true;
             });
 
             //]]>
@@ -150,6 +155,7 @@
                             $('.selected-container').before(response['html']);
                             document.getElementById('lockers-mobile').scrollIntoView();
                         }
+                        $('#lockers-postcode').val(response['postcode']);
                         $('.load-overlay-global').hide();
                     },
                     complete: function(response) {

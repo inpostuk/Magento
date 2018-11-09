@@ -64,7 +64,7 @@ class Inpost_Api_Client
      * @return Inpost_Models_Parcel|Zend_Http_Response
      * @throws Inpost_Exception
      */
-    public function createParcel($receiverPhone, $machineId, $size, $weight, $receiverEmail,  $jsonFormat = false)
+    public function createParcel($receiverPhone, $machineId, $size, $weight, $receiverEmail, $orderId = false, $jsonFormat = false)
     {
         $parcel = new Inpost_Models_Parcel();
         $path = "customers/{$this->merchantEmail}/parcels";
@@ -77,6 +77,11 @@ class Inpost_Api_Client
                 'weight' => $weight,
                 'receiver_email' => $receiverEmail
             );
+
+            if ($orderId) {
+                $params['customer_reference'] = $orderId;
+            }
+
             $response = $this->postOnEndpoint($path, $params);
 
             if ($jsonFormat) {

@@ -80,40 +80,54 @@ class Inpost_Lockers_Model_Cron
         )
     );
 
+    private $lockers = array();
+
     public function getMachinesFromApi()
     {
+        $lockers = Mage::getResourceModel('inpost_lockers/machine_collection')
+            ->addFieldToSelect('*');
+
+        foreach ($lockers as $locker) {
+            $this->lockers[$locker->getData('id')] = array(
+                'locker' => $locker,
+                'is_in_inpost' => false
+            );
+        }
+
         $helper = Mage::helper('inpost_lockers');
         $client = new Inpost_Api_Client($helper->getToken());
         $machines = $client->getMachinesList();
         foreach ($machines as $machine) {
-            if ($machine->getData('status') == 'Operating' && $machine->getData('id')) {
-                $model = Mage::getResourceModel('inpost_lockers/machine_collection')
-                    ->addFieldToSelect('*')
-                    ->addFieldToFilter('id', $machine['id'])
-                    ->setPageSize(1)
-                    ->setCurPage(1)
-                    ->getLastItem();
-                $attributesForUpdate = array();
-                if ($model->getId()) {
-                    foreach ($machine->getData() as $key => $value) {
-                        if ($model->getData($key) !== $value) {
-                            $attributesForUpdate[$key] = $value;
+            if (array_key_exists($machine->getData('id'), $this->lockers)) {
+                $this->lockers[$machine->getData('id')]['is_in_inpost'] = true;
+                if ($machine->getData('status') == 'Operating' && $machine->getData('id')) {
+                    $lockerModel = $this->lockers[$machine->getData('id')]['locker'];
+                    $attributesForUpdate = array();
+                    if ($lockerModel->getId()) {
+                        foreach ($machine->getData() as $key => $value) {
+                            if ($lockerModel->getData($key) !== $value) {
+                                $attributesForUpdate[$key] = $value;
+                            }
                         }
+                    } else {
+                        $attributesForUpdate = $machine->getData();
                     }
-                } else {
-                    $attributesForUpdate = $machine->getData();
-                }
 
-                $model->updateAttributes($attributesForUpdate);
+                    $lockerModel->updateAttributes($attributesForUpdate);
+                } else {
+                    $lockerModel = $this->lockers[$machine->getData('id')]['locker'];
+                    $lockerModel->getResource()->removeMachineById($lockerModel->getId());
+                }
             } else {
-                $model = Mage::getResourceModel('inpost_lockers/machine_collection')
-                    ->addFieldToSelect('*')
-                    ->addFieldToFilter('id', $machine['id'])
-                    ->setPageSize(1)
-                    ->setCurPage(1)
-                    ->getLastItem();
-                if ($model->getId()) {
-                    $model->getResource()->removeMachineById($model->getId());
+                $model = Mage::getModel('inpost_lockers/machine');
+                $model->updateAttributes($machine->getData());
+            }
+        }
+
+        if (count($machines) > 0) {
+            foreach ($this->lockers as $locker) {
+                if (!$locker['is_in_inpost']) {
+                    $locker['locker']->getResource()->removeMachineById($locker['locker']->getId());
                 }
             }
         }
