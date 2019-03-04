@@ -36,7 +36,7 @@ class Inpost_Models_Parcel extends Varien_Object
 
     public function preparePhone($phone) {
         $phone = trim($phone);
-        $phone = preg_replace('/(^\+44)|(^0044)|(^0)|(\s+)/', '', $phone);
+        $phone = preg_replace('/(^\+44)|(^44)|(^0044)|(^0)|(\s+)/', '', $phone);
         return $phone;
     }
 }
