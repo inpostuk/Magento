@@ -224,11 +224,11 @@ class Inpost_Lockers_Model_Cron
 
             $data = $this->_mapping[$lastNotFinal['status']];
             $this->setOrderStatusAndComment($order, $data);
+        }
 
-            foreach ($counter as $key => $value) {
-                if ($value['counter'] > 0) {
-                    $this->createNotification($value);
-                }
+        foreach ($counter as $key => $value) {
+            if ($value['counter'] > 0) {
+                $this->createNotification($value);
             }
         }
     }

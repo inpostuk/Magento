@@ -4,7 +4,7 @@
  * (c) InPost UK Ltd <it_support@inpost.co.uk>
  * This source file is subject to the license that is bundled
  * with this source code in the file LICENSE.
- * 
+ *
  * Built by NMedia Systems Ltd, <info@nmediasystems.com>
  */
 
@@ -91,6 +91,12 @@ class Inpost_Models_Machine extends Varien_Object
         return $this;
     }
 
+    /**
+     * Prepare Machine response data for return
+     *
+     * @param array $arr
+     * @return array
+     */
     protected function prepareData(array $arr)
     {
         if (array_key_exists('_links', $arr)) {

@@ -25,21 +25,54 @@ class Inpost_Lockers_Model_Carrier
 
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
-        $helper = Mage::helper('inpost_lockers');
-
         /** @var Mage_Shipping_Model_Rate_Result $result */
         $result = Mage::getModel('shipping/rate_result');
 
-        $expressAvailable = true;
-        foreach ($request->getAllItems() as $item) {
-            $expressAvailable = false;
-        }
+        $helper = Mage::helper('inpost_lockers');
+        if ($helper->isActive()) {
+            $empty = array();
+            if (!$helper->getCreateLabelsInMagentoFlag()) {
+                if (!$helper->getGoogleMapsKey()) {
+                    $empty[] = 'Google maps api key';
+                }
+            } else {
+                if (!$helper->getToken() || !$helper->getGoogleMapsKey() || !$helper->getMerchantEmail()) {
+                    if (!$helper->getToken()) {
+                        $empty[] = 'Api Token';
+                    }
+                    if (!$helper->getGoogleMapsKey()) {
+                        $empty[] = 'Google maps api key';
+                    }
+                    if (!$helper->getMerchantEmail()) {
+                        $empty[] = 'Merchant Email';
+                    }
+                }
+            }
 
-        if ($expressAvailable) {
-            $result->append($this->_getExpressRate());
-        }
+            if (count($empty) == 0) {
+                $expressAvailable = true;
+                foreach ($request->getAllItems() as $item) {
+                    $expressAvailable = false;
+                }
 
-        $result->append($this->_getStandardRate($request));
+                if ($expressAvailable) {
+                    $result->append($this->_getExpressRate());
+                }
+
+                $result->append($this->_getStandardRate($request));
+            } else {
+                Mage::log(
+                    sprintf(
+                        'Please checkout InPost configurations. %s %s empty.',
+                        implode(', ', $empty),
+                        (count($empty) > 1) ? 'are' : 'is'
+                    ),
+                    3,
+                    'errors.log',
+                    true
+                );
+            }
+        }
 
         return $result;
     }

@@ -10,8 +10,32 @@
 
 class Inpost_Exception extends Exception
 {
-    public function __construct($message, $code = 0, Exception $previous = null) {
-
-        parent::__construct($message, $code, $previous);
+    /**
+     * Inpost_Exception constructor.
+     * @param $message
+     */
+    public function __construct($message)
+    {
+        if (is_object($message)) {
+            $exceptionMessage = $message->getMessage();
+            if ($message->getStatus() === 422) {
+                $response = (array)json_decode($message->getBody());
+                if (array_key_exists('status_code', $response) && $response['status_code'] == 422) {
+                    if (array_key_exists('message', $response) &&
+                        array_key_exists('errors', $response) &&
+                        count((array)$response['errors'])) {
+                        $exceptionMessage = $response['message'] . ": ";
+                        foreach ($response['errors'] as $key => $error) {
+                            $exceptionMessage .= "$key ";
+                        }
+                    } else {
+                        $exceptionMessage = $response['message'];
+                    }
+                }
+            }
+            parent::__construct($exceptionMessage, $message->getStatus());
+        } else if (is_string($message)) {
+            parent::__construct($message);
+        }
     }
 }

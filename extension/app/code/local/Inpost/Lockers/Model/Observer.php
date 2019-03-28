@@ -59,12 +59,13 @@ class Inpost_Lockers_Model_Observer
                     if ($parcel->getId()) {
                         $helper = Mage::helper('inpost_lockers');
                         $client->pay($parcel->getId());
-                        $client->getLabel(
+                        $label = $client->getOutboundLabel(
                             $parcel->getId(),
-                            $helper->getLabelsPath(),
-                            $order->getIncrementId(),
                             $helper->getLabelsFormat()
                         );
+                        if ($label) {
+                            file_put_contents("{$helper->getLabelsPath()}/{$order->getIncrementId()}_{$parcel->getId()}.{$helper->getLabelsFormat()}", $label);
+                        }
                         $order->save();
                     }
                 } catch (Exception $e) {

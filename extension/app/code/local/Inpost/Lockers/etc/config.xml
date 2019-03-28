@@ -174,7 +174,7 @@
         <carriers>
             <inpost_lockers>
                 <active>0</active>
-                <parcel_create>1</parcel_create>
+                <parcel_create>0</parcel_create>
                 <model>inpost_lockers/carrier</model>
                 <title>InPost 24/7 Lockers</title>
                 <method>InPost Next Day Locker Collection</method>
